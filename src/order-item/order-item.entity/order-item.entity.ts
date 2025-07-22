@@ -7,37 +7,22 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-@Entity('orders')
-export class OrderEntity {
+@Entity('order_items')
+export class OrderItemEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', name: 'company_id', nullable: false })
-  companyId: string;
+  @Column({ type: 'uuid', name: 'order_id', nullable: false })
+  orderId: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  number: string;
+  @Column({ type: 'uuid', name: 'product_id', nullable: false })
+  productId: string;
 
-  @Column({
-    type: 'enum',
-    enum: ['sales', 'purchase', 'transfer'],
-    name: 'type',
-    nullable: false,
-  })
-  type: 'sales' | 'purchase' | 'transfer';
+  @Column({ type: 'integer', nullable: false })
+  quantity: number;
 
-  @Column({ type: 'uuid', name: 'customer_id', nullable: false })
-  customerId: string;
-
-  @Column({ type: 'uuid', name: 'warehouse_id', nullable: false })
-  warehouseId: string;
-
-  @Column({
-    type: 'timestamp',
-    nullable: false,
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  date?: Date;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  price: string;
 
   @CreateDateColumn({
     name: 'created_at',

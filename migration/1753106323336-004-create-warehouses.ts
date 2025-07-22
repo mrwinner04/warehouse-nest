@@ -8,6 +8,10 @@ import {
 
 export class CreateWarehouses1753106323336 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `CREATE TYPE "product_type_enum" AS ENUM ('solid', 'liquid')`,
+    );
+
     await queryRunner.createTable(
       new Table({
         name: 'warehouses',
@@ -27,7 +31,7 @@ export class CreateWarehouses1753106323336 implements MigrationInterface {
           },
           {
             name: 'type',
-            type: 'varchar',
+            type: 'product_type_enum',
             isNullable: true,
           },
           {
@@ -114,5 +118,6 @@ export class CreateWarehouses1753106323336 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable('warehouses');
+    await queryRunner.query('DROP TYPE IF EXISTS "warehouse_type_enum"');
   }
 }

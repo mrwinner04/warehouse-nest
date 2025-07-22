@@ -8,10 +8,6 @@ import {
 
 export class CreateProducts1753106326057 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TYPE "product_type_enum" AS ENUM ('solid', 'liquid')`,
-    );
-
     await queryRunner.createTable(
       new Table({
         name: 'products',

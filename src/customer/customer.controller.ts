@@ -4,9 +4,9 @@ import {
   Post,
   Body,
   Param,
-  Patch,
   Delete,
   BadRequestException,
+  Put,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerEntity } from './customer.entity/customer.entity';
@@ -35,7 +35,7 @@ export class CustomerController {
     return this.customerService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<CustomerEntity>,
