@@ -18,7 +18,7 @@ import { OrderModule } from '../order/order.module';
       port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
-      database: process.env.DB_NAME || 'warehouse',
+      database: process.env.DB_NAME || 'warehouse_nest',
       autoLoadEntities: true,
       synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),

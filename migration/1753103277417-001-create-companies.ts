@@ -22,12 +22,14 @@ export class CreateCompanies1753103277417 implements MigrationInterface {
           {
             name: 'created_at',
             type: 'timestamp',
-            isNullable: true,
+            isNullable: false,
+            default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updated_at',
             type: 'timestamp',
-            isNullable: true,
+            isNullable: false,
+            default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'deleted_at',
