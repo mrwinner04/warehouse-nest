@@ -16,12 +16,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from './user.entity/user.entity';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
+  @HttpCode(201)
   async register(
     @Body() data: Partial<UserEntity>,
   ): Promise<Omit<UserEntity, 'password'>> {
@@ -84,6 +86,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER)
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(id);
   }

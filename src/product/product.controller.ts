@@ -11,12 +11,14 @@ import {
 import { ProductService } from './product.service';
 import { ProductEntity } from './product.entity/product.entity';
 import { ProductSchema } from './product.zod';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @HttpCode(201)
   async create(@Body() data: Partial<ProductEntity>): Promise<ProductEntity> {
     const result = ProductSchema.safeParse(data);
     if (!result.success) {
@@ -49,6 +51,7 @@ export class ProductController {
 
   // Soft delete a product by ID
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.productService.remove(id);
   }

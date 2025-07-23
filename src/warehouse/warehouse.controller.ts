@@ -11,12 +11,14 @@ import {
 import { WarehouseService } from './warehouse.service';
 import { WarehouseEntity } from './warehouse.entity/warehouse.entity';
 import { WarehouseSchema } from './warehouse.zod';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('warehouse')
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Post()
+  @HttpCode(204)
   async create(
     @Body() data: Partial<WarehouseEntity>,
   ): Promise<WarehouseEntity> {
@@ -50,6 +52,7 @@ export class WarehouseController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.warehouseService.remove(id);
   }

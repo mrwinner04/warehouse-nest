@@ -5,7 +5,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
+import { CompanyEntity } from '../../company/company.entity/company.entity';
+import { CustomerEntity } from '../../customer/customer.entity/customer.entity';
+import { WarehouseEntity } from '../../warehouse/warehouse.entity/warehouse.entity';
+import { OrderItemEntity } from '../../orderItem/order-item.entity/order-item.entity';
+import { InvoiceEntity } from '../../invoice/invoice.entity/invoice.entity';
 
 @Entity('orders')
 export class OrderEntity {
@@ -14,6 +22,10 @@ export class OrderEntity {
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.orders)
+  @JoinColumn({ name: 'company_id' })
+  company: CompanyEntity;
 
   @Column({ type: 'varchar', nullable: false })
   number: string;
@@ -29,8 +41,16 @@ export class OrderEntity {
   @Column({ type: 'uuid', name: 'customer_id', nullable: false })
   customerId: string;
 
+  @ManyToOne(() => CustomerEntity, (customer) => customer.orders)
+  @JoinColumn({ name: 'customer_id' })
+  customer: CustomerEntity;
+
   @Column({ type: 'uuid', name: 'warehouse_id', nullable: false })
   warehouseId: string;
+
+  @ManyToOne(() => WarehouseEntity, (warehouse) => warehouse.orders)
+  @JoinColumn({ name: 'warehouse_id' })
+  warehouse: WarehouseEntity;
 
   @Column({
     type: 'timestamp',
@@ -60,4 +80,10 @@ export class OrderEntity {
 
   @Column({ type: 'uuid', name: 'modified_by', nullable: true })
   modifiedBy?: string;
+
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order)
+  orderItems: OrderItemEntity[];
+
+  @OneToMany(() => InvoiceEntity, (invoice) => invoice.order)
+  invoices: InvoiceEntity[];
 }

@@ -11,12 +11,14 @@ import {
 import { CompanyService } from './company.service';
 import { CompanyEntity } from './company.entity/company.entity';
 import { CompanySchema } from './company.zod';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Post()
+  @HttpCode(201)
   async create(@Body() data: Partial<CompanyEntity>): Promise<CompanyEntity> {
     const result = CompanySchema.safeParse(data);
     if (!result.success) {
@@ -49,6 +51,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.companyService.remove(id);
   }

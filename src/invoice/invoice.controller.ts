@@ -11,12 +11,14 @@ import {
 import { InvoiceService } from './invoice.service';
 import { InvoiceEntity } from './invoice.entity/invoice.entity';
 import { InvoiceSchema } from './invoice.zod';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('invoice')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
   @Post()
+  @HttpCode(201)
   async create(@Body() data: Partial<InvoiceEntity>): Promise<InvoiceEntity> {
     const result = InvoiceSchema.safeParse(data);
     if (!result.success) {
@@ -48,6 +50,7 @@ export class InvoiceController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.invoiceService.remove(id);
   }

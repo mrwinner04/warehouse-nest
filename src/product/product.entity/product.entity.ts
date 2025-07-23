@@ -5,7 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
+import { CompanyEntity } from '../../company/company.entity/company.entity';
+import { OrderItemEntity } from '../../orderItem/order-item.entity/order-item.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -14,6 +19,10 @@ export class ProductEntity {
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.products)
+  @JoinColumn({ name: 'company_id' })
+  company: CompanyEntity;
 
   @Column({ type: 'varchar', nullable: false })
   name: string;
@@ -37,6 +46,9 @@ export class ProductEntity {
     nullable: false,
   })
   type: 'solid' | 'liquid';
+
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.product)
+  orderItems: OrderItemEntity[];
 
   @CreateDateColumn({
     name: 'created_at',

@@ -11,12 +11,14 @@ import { OrderService } from './order.service';
 import { OrderEntity } from './order.entity/order.entity';
 import { OrderSchema } from './order.zod';
 import { BadRequestException } from '@nestjs/common';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
+  @HttpCode(201)
   async create(@Body() data: Partial<OrderEntity>): Promise<OrderEntity> {
     const result = OrderSchema.safeParse(data);
     if (!result.success) {
@@ -48,6 +50,7 @@ export class OrderController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.orderService.remove(id);
   }

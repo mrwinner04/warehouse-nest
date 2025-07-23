@@ -1,6 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { CompanyEntity } from '../company/company.entity/company.entity';
 import { WarehouseEntity } from '../warehouse/warehouse.entity/warehouse.entity';
+import { faker } from '@faker-js/faker';
 
 export async function seedCompaniesAndWarehouses(dataSource: DataSource) {
   const companyRepo: Repository<CompanyEntity> =
@@ -9,44 +10,41 @@ export async function seedCompaniesAndWarehouses(dataSource: DataSource) {
     dataSource.getRepository(WarehouseEntity);
 
   // --- Companies ---
-  const companies = [
-    companyRepo.create({ name: 'Acme Corp' }),
-    companyRepo.create({ name: 'Globex Inc.' }),
-    companyRepo.create({ name: 'Initech' }),
-    companyRepo.create({ name: 'Umbrella Corp' }),
-  ];
+  const companies = Array.from({ length: 4 }).map(() =>
+    companyRepo.create({ name: faker.company.name() }),
+  );
   await companyRepo.save(companies);
 
   // --- Warehouses ---
   const warehouses = [
     warehouseRepo.create({
       companyId: companies[0].id,
-      name: 'Acme Main Warehouse',
-      address: '123 Acme St',
+      name: faker.company.name() + ' Main Warehouse',
+      address: faker.location.streetAddress(),
       type: 'solid',
     }),
     warehouseRepo.create({
       companyId: companies[0].id,
-      name: 'Acme Liquid Storage',
-      address: '456 Acme Ave',
+      name: faker.company.name() + ' Liquid Storage',
+      address: faker.location.streetAddress(),
       type: 'liquid',
     }),
     warehouseRepo.create({
       companyId: companies[1].id,
-      name: 'Globex Central',
-      address: '789 Globex Blvd',
+      name: faker.company.name() + ' Central',
+      address: faker.location.streetAddress(),
       type: 'solid',
     }),
     warehouseRepo.create({
       companyId: companies[2].id,
-      name: 'Initech Warehouse',
-      address: '101 Initech Rd',
+      name: faker.company.name() + ' Warehouse',
+      address: faker.location.streetAddress(),
       type: 'solid',
     }),
     warehouseRepo.create({
       companyId: companies[3].id,
-      name: 'Umbrella Storage',
-      address: '202 Umbrella Ln',
+      name: faker.company.name() + ' Storage',
+      address: faker.location.streetAddress(),
       type: 'liquid',
     }),
   ];

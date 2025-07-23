@@ -6,6 +6,7 @@ import { ProductEntity } from '../product/product.entity/product.entity';
 import { CustomerEntity } from '../customer/customer.entity/customer.entity';
 import { OrderItemEntity } from '../orderItem/order-item.entity/order-item.entity';
 import { OrderEntity } from '../order/order.entity/order.entity';
+import { InvoiceEntity } from '../invoice/invoice.entity/invoice.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -22,5 +23,6 @@ export const AppDataSource = new DataSource({
     CustomerEntity,
     OrderItemEntity,
     OrderEntity,
+    InvoiceEntity,
   ],
 });

@@ -5,7 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { OrderEntity } from '../../order/order.entity/order.entity';
+import { ProductEntity } from '../../product/product.entity/product.entity';
 
 @Entity('order_items')
 export class OrderItemEntity {
@@ -15,8 +19,16 @@ export class OrderItemEntity {
   @Column({ type: 'uuid', name: 'order_id', nullable: false })
   orderId: string;
 
+  @ManyToOne(() => OrderEntity, (order) => order.orderItems)
+  @JoinColumn({ name: 'order_id' })
+  order: OrderEntity;
+
   @Column({ type: 'uuid', name: 'product_id', nullable: false })
   productId: string;
+
+  @ManyToOne(() => ProductEntity, (product) => product.orderItems)
+  @JoinColumn({ name: 'product_id' })
+  product: ProductEntity;
 
   @Column({ type: 'integer', nullable: false })
   quantity: number;

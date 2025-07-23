@@ -5,7 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { OrderEntity } from '../../order/order.entity/order.entity';
+import { CompanyEntity } from '../../company/company.entity/company.entity';
 
 @Entity('customers')
 export class CustomerEntity {
@@ -14,6 +19,10 @@ export class CustomerEntity {
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.customers)
+  @JoinColumn({ name: 'company_id' })
+  company: CompanyEntity;
 
   @Column({
     type: 'enum',
@@ -28,6 +37,9 @@ export class CustomerEntity {
 
   @Column({ type: 'varchar', nullable: true })
   email?: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.customer)
+  orders: OrderEntity[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', nullable: true })
   createdAt?: Date;

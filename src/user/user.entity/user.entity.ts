@@ -5,7 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { CompanyEntity } from '../../company/company.entity/company.entity';
 
 export enum UserRole {
   OWNER = 'OWNER',
@@ -20,6 +23,10 @@ export class UserEntity {
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.users)
+  @JoinColumn({ name: 'company_id' })
+  company: CompanyEntity;
 
   @Column({ type: 'varchar', nullable: false, unique: true })
   email: string;

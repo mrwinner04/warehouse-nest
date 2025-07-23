@@ -1,47 +1,39 @@
 import { DataSource, Repository } from 'typeorm';
 import { OrderItemEntity } from '../orderItem/order-item.entity/order-item.entity';
+import { faker } from '@faker-js/faker';
+
+interface OrderLike {
+  id: string;
+  companyId: string;
+}
+interface ProductLike {
+  id: string;
+  companyId: string;
+  price: string;
+}
 
 export async function seedOrderItems(
   dataSource: DataSource,
-  orders: { id: string }[],
-  products: { id: string }[],
+  orders: OrderLike[],
+  products: ProductLike[],
 ) {
   const orderItemRepo: Repository<OrderItemEntity> =
     dataSource.getRepository(OrderItemEntity);
 
   // --- Order Items ---
-  const orderItems = [
-    orderItemRepo.create({
-      orderId: orders[0].id,
-      productId: products[0].id,
-      quantity: 2,
-      price: '9.99',
-    }),
-    orderItemRepo.create({
-      orderId: orders[0].id,
-      productId: products[1].id,
-      quantity: 1,
-      price: '19.99',
-    }),
-    orderItemRepo.create({
-      orderId: orders[1].id,
-      productId: products[2].id,
-      quantity: 3,
-      price: '29.99',
-    }),
-    orderItemRepo.create({
-      orderId: orders[2].id,
-      productId: products[3].id,
-      quantity: 5,
-      price: '0.99',
-    }),
-    orderItemRepo.create({
-      orderId: orders[3].id,
-      productId: products[4].id,
-      quantity: 1,
-      price: '999.99',
-    }),
-  ];
+  const orderItems = orders.flatMap((order) => {
+    const availableProducts = faker.helpers.shuffle(
+      products.filter((p) => p.companyId === order.companyId),
+    );
+    return availableProducts.slice(0, 3).map((product) =>
+      orderItemRepo.create({
+        orderId: order.id,
+        productId: product.id,
+        quantity: faker.number.int({ min: 1, max: 10 }),
+        price: product.price,
+      }),
+    );
+  });
   await orderItemRepo.save(orderItems);
 
   console.log('Seeded order items');

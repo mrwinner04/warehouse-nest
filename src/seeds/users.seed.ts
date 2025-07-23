@@ -1,6 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { UserEntity, UserRole } from '../user/user.entity/user.entity';
 import * as bcrypt from 'bcryptjs';
+import { faker } from '@faker-js/faker';
 
 export async function seedUsers(
   dataSource: DataSource,
@@ -10,36 +11,29 @@ export async function seedUsers(
 
   // --- Users ---
   const password = await bcrypt.hash('password123', 10);
-  const users = [
+  const users = companies.flatMap((company) => [
     userRepo.create({
-      companyId: companies[0].id,
-      email: 'owner@acme.com',
+      companyId: company.id,
+      email: faker.internet.email(),
       password,
-      name: 'Acme Owner',
+      name: faker.person.fullName(),
       role: UserRole.OWNER,
     }),
     userRepo.create({
-      companyId: companies[1].id,
-      email: 'admin@globex.com',
+      companyId: company.id,
+      email: faker.internet.email(),
       password,
-      name: 'Globex Admin',
-      role: UserRole.OWNER,
-    }),
-    userRepo.create({
-      companyId: companies[2].id,
-      email: 'manager@initech.com',
-      password,
-      name: 'Initech Manager',
+      name: faker.person.fullName(),
       role: UserRole.OPERATOR,
     }),
     userRepo.create({
-      companyId: companies[3].id,
-      email: 'viewer@umbrella.com',
+      companyId: company.id,
+      email: faker.internet.email(),
       password,
-      name: 'Umbrella Viewer',
+      name: faker.person.fullName(),
       role: UserRole.VIEWER,
     }),
-  ];
+  ]);
   await userRepo.save(users);
 
   console.log('Seeded users');

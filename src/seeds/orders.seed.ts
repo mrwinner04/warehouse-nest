@@ -1,50 +1,47 @@
 import { DataSource, Repository } from 'typeorm';
 import { OrderEntity } from '../order/order.entity/order.entity';
+import { faker } from '@faker-js/faker';
+
+interface CompanyLike {
+  id: string;
+}
+interface CustomerLike {
+  id: string;
+  companyId: string;
+}
+interface WarehouseLike {
+  id: string;
+  companyId: string;
+}
 
 export async function seedOrders(
   dataSource: DataSource,
-  companies: { id: string }[],
-  customers: { id: string }[],
-  warehouses: { id: string }[],
+  companies: CompanyLike[],
+  customers: CustomerLike[],
+  warehouses: WarehouseLike[],
 ) {
   const orderRepo: Repository<OrderEntity> =
     dataSource.getRepository(OrderEntity);
 
   // --- Orders ---
-  const orders = [
-    orderRepo.create({
-      companyId: companies[0].id,
-      number: 'ORD-ACME-001',
-      type: 'sales',
-      customerId: customers[0].id,
-      warehouseId: warehouses[0].id,
-      date: new Date(),
+  const orders = companies.flatMap((company) =>
+    Array.from({ length: 4 }).map(() => {
+      const customer = faker.helpers.arrayElement(
+        customers.filter((c) => c.companyId === company.id),
+      );
+      const warehouse = faker.helpers.arrayElement(
+        warehouses.filter((w) => w.companyId === company.id),
+      );
+      return orderRepo.create({
+        companyId: company.id,
+        number: faker.string.alphanumeric(10).toUpperCase(),
+        type: faker.helpers.arrayElement(['sales', 'purchase', 'transfer']),
+        customerId: customer.id,
+        warehouseId: warehouse.id,
+        date: faker.date.recent(),
+      });
     }),
-    orderRepo.create({
-      companyId: companies[1].id,
-      number: 'ORD-GLOBEX-001',
-      type: 'purchase',
-      customerId: customers[2].id,
-      warehouseId: warehouses[2].id,
-      date: new Date(),
-    }),
-    orderRepo.create({
-      companyId: companies[2].id,
-      number: 'ORD-INITECH-001',
-      type: 'sales',
-      customerId: customers[3].id,
-      warehouseId: warehouses[3].id,
-      date: new Date(),
-    }),
-    orderRepo.create({
-      companyId: companies[3].id,
-      number: 'ORD-UMBRELLA-001',
-      type: 'transfer',
-      customerId: customers[4].id,
-      warehouseId: warehouses[4].id,
-      date: new Date(),
-    }),
-  ];
+  );
   await orderRepo.save(orders);
 
   console.log('Seeded orders');

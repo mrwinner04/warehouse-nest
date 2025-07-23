@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { OrderEntity } from '../../order/order.entity/order.entity';
 
 @Entity('warehouses')
 export class WarehouseEntity {
@@ -28,6 +30,9 @@ export class WarehouseEntity {
 
   @Column({ type: 'text', nullable: true })
   address?: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.warehouse)
+  orders: OrderEntity[];
 
   @CreateDateColumn({
     name: 'created_at',

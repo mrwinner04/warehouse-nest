@@ -11,12 +11,14 @@ import {
 import { CustomerService } from './customer.service';
 import { CustomerEntity } from './customer.entity/customer.entity';
 import { CustomerSchema } from './customer.zod';
+import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
 @Controller('customer')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Post()
+  @HttpCode(201)
   async create(@Body() data: Partial<CustomerEntity>): Promise<CustomerEntity> {
     const result = CustomerSchema.safeParse(data);
     if (!result.success) {
@@ -48,6 +50,7 @@ export class CustomerController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.customerService.remove(id);
   }
