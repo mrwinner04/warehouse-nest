@@ -7,7 +7,7 @@ import { CustomerModule } from '../customer/customer.module';
 import { WarehouseModule } from '../warehouse/warehouse.module';
 import { ProductModule } from '../product/product.module';
 import { OrderModule } from '../order/order.module';
-import { OrderItemModule } from '../order-item/order-item.module';
+import { OrderItemModule } from '../orderItem/order-item.module';
 import { InvoiceModule } from 'src/invoice/invoice.module';
 import { AuthModule } from '../auth/auth.module';
 @Module({
