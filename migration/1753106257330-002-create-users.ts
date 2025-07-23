@@ -54,13 +54,13 @@ export class CreateUsers1753106257330 implements MigrationInterface {
           {
             name: 'created_at',
             type: 'timestamp',
-            isNullable: true,
+            isNullable: false,
             default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updated_at',
             type: 'timestamp',
-            isNullable: true,
+            isNullable: false,
             default: 'CURRENT_TIMESTAMP',
           },
           {

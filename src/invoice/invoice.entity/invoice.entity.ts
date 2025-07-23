@@ -7,31 +7,29 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-export enum UserRole {
-  OWNER = 'OWNER',
-  OPERATOR = 'OPERATOR',
-  VIEWER = 'VIEWER',
-}
-
-@Entity('users')
-export class UserEntity {
+@Entity('invoices')
+export class InvoiceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
 
-  @Column({ type: 'varchar', nullable: false, unique: true })
-  email: string;
+  @Column({ type: 'uuid', name: 'order_id', nullable: false })
+  orderId: string;
 
   @Column({ type: 'varchar', nullable: false })
-  password: string;
+  number: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: false })
-  name: string;
+  @Column({
+    type: 'timestamp',
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  date?: Date;
 
-  @Column({ type: 'varchar', nullable: false, default: UserRole.VIEWER })
-  role: UserRole;
+  @Column({ type: 'varchar', nullable: false, default: 'pending' })
+  status: string;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -39,7 +37,7 @@ export class UserEntity {
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt?: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
@@ -47,8 +45,11 @@ export class UserEntity {
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
   })
-  updatedAt?: Date;
+  updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt?: Date;
+
+  @Column({ type: 'uuid', name: 'modified_by', nullable: true })
+  modifiedBy?: string;
 }

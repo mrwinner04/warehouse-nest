@@ -1,13 +1,21 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity } from './order.entity/order.entity';
+import { InvoiceService } from '../invoice/invoice.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
+    @Inject(forwardRef(() => InvoiceService))
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   async create(data: Partial<OrderEntity>): Promise<OrderEntity> {
@@ -20,12 +28,21 @@ export class OrderService {
         'An order with this number already exists for this company',
       );
     }
-    // If date is not provided, set it to now
     if (!data.date) {
       data.date = new Date();
     }
     const order = this.orderRepository.create(data);
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    await this.invoiceService.create({
+      companyId: savedOrder.companyId,
+      orderId: savedOrder.id,
+      number: `INV-${Date.now()}`,
+      date: savedOrder.date,
+      status: 'pending',
+    });
+
+    return savedOrder;
   }
 
   findAll(): Promise<OrderEntity[]> {
