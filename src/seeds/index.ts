@@ -6,7 +6,6 @@ import { seedCustomers } from './customers.seed';
 import { seedOrders } from './orders.seed';
 import { seedOrderItems } from './order-items.seed';
 
-//kato nova migraciq da se napravi .insert
 async function runAllSeeds() {
   await AppDataSource.initialize();
 

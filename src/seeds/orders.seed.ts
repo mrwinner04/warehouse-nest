@@ -42,7 +42,7 @@ export async function seedOrders(
       });
     }),
   );
-  await orderRepo.save(orders);
+  await orderRepo.insert(orders);
 
   console.log('Seeded orders');
   return orders;

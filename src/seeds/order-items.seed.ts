@@ -34,7 +34,7 @@ export async function seedOrderItems(
       }),
     );
   });
-  await orderItemRepo.save(orderItems);
+  await orderItemRepo.insert(orderItems);
 
   console.log('Seeded order items');
   return orderItems;

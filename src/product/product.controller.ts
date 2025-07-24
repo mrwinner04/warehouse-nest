@@ -16,6 +16,11 @@ import { ProductSchema } from './product.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../user/user.entity';
+import {
+  BestsellingProduct,
+  ClientWithMostOrders,
+  ProductWithHighestStock,
+} from './product.reports';
 
 @Controller('product')
 export class ProductController {
@@ -32,7 +37,6 @@ export class ProductController {
   }
 
   @Get()
-  // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
     @Query('page') page?: string,
@@ -40,13 +44,37 @@ export class ProductController {
     @Query('name') name?: string,
     @Query('code') code?: string,
   ) {
-    // Parse pagination params
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 20;
     return this.productService.findAll(req.user.companyId, pageNum, limitNum, {
       name,
       code,
     });
+  }
+
+  @Get('bestselling')
+  getBestsellingProducts(
+    @Request() req: { user: { companyId: string } },
+    @Query('limit') limit?: string,
+  ): Promise<BestsellingProduct[]> {
+    const lim = limit ? parseInt(limit, 10) : 10;
+    return this.productService.getBestsellingProducts(req.user.companyId, lim);
+  }
+
+  @Get('client-with-most-orders')
+  getClientWithMostOrders(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ClientWithMostOrders | undefined> {
+    return this.productService.getClientWithMostOrders(req.user.companyId);
+  }
+
+  @Get('highest-stock-per-warehouse')
+  getProductWithHighestStockPerWarehouse(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ProductWithHighestStock[]> {
+    return this.productService.getProductWithHighestStockPerWarehouse(
+      req.user.companyId,
+    );
   }
 
   @Get(':id')

@@ -2,6 +2,7 @@ import { DataSource, Repository } from 'typeorm';
 import { CompanyEntity } from '../company/company.entity';
 import { WarehouseEntity } from '../warehouse/warehouse.entity';
 import { faker } from '@faker-js/faker';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function seedCompaniesAndWarehouses(dataSource: DataSource) {
   const companyRepo: Repository<CompanyEntity> =
@@ -10,10 +11,11 @@ export async function seedCompaniesAndWarehouses(dataSource: DataSource) {
     dataSource.getRepository(WarehouseEntity);
 
   // --- Companies ---
-  const companies = Array.from({ length: 4 }).map(() =>
-    companyRepo.create({ name: faker.company.name() }),
-  );
-  await companyRepo.save(companies);
+  const companies = Array.from({ length: 4 }).map(() => ({
+    id: uuidv4(),
+    name: faker.company.name(),
+  }));
+  await companyRepo.insert(companies);
 
   // --- Warehouses ---
   const warehouses = [

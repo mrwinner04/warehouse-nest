@@ -20,7 +20,7 @@ export async function seedCustomers(
       }),
     ),
   );
-  await customerRepo.save(customers);
+  await customerRepo.insert(customers);
 
   console.log('Seeded customers');
   return customers;

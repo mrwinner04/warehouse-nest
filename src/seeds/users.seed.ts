@@ -34,7 +34,7 @@ export async function seedUsers(
       role: UserRole.VIEWER,
     }),
   ]);
-  await userRepo.save(users);
+  await userRepo.insert(users);
 
   console.log('Seeded users');
   return users;
