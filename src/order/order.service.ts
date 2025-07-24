@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OrderEntity } from './order.entity/order.entity';
+import { OrderEntity } from './order.entity';
 import { InvoiceService } from '../invoice/invoice.service';
 
 @Injectable()
@@ -45,8 +45,8 @@ export class OrderService {
     return savedOrder;
   }
 
-  findAll(): Promise<OrderEntity[]> {
-    return this.orderRepository.find();
+  findAll(companyId: string): Promise<OrderEntity[]> {
+    return this.orderRepository.find({ where: { companyId } });
   }
 
   findOne(id: string): Promise<OrderEntity | null> {

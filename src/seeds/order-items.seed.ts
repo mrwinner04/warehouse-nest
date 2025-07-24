@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { OrderItemEntity } from '../orderItem/order-item.entity/order-item.entity';
+import { OrderItemEntity } from '../orderItem/order-item.entity';
 import { faker } from '@faker-js/faker';
 
 interface OrderLike {

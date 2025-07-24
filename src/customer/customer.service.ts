@@ -24,8 +24,8 @@ export class CustomerService {
     return this.customerRepository.save(customer);
   }
 
-  findAll(): Promise<CustomerEntity[]> {
-    return this.customerRepository.find();
+  findAll(companyId: string): Promise<CustomerEntity[]> {
+    return this.customerRepository.find({ where: { companyId } });
   }
 
   findOne(id: string): Promise<CustomerEntity | null> {

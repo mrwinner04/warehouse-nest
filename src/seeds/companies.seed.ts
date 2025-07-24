@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
-import { CompanyEntity } from '../company/company.entity/company.entity';
-import { WarehouseEntity } from '../warehouse/warehouse.entity/warehouse.entity';
+import { CompanyEntity } from '../company/company.entity';
+import { WarehouseEntity } from '../warehouse/warehouse.entity';
 import { faker } from '@faker-js/faker';
 
 export async function seedCompaniesAndWarehouses(dataSource: DataSource) {

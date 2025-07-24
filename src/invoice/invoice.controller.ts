@@ -7,9 +7,10 @@ import {
   Put,
   Delete,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
-import { InvoiceEntity } from './invoice.entity/invoice.entity';
+import { InvoiceEntity } from './invoice.entity';
 import { InvoiceSchema } from './invoice.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
@@ -28,8 +29,11 @@ export class InvoiceController {
   }
 
   @Get()
-  findAll(): Promise<InvoiceEntity[]> {
-    return this.invoiceService.findAll();
+  // Add JWT guard if not present
+  findAll(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<InvoiceEntity[]> {
+    return this.invoiceService.findAll(req.user.companyId);
   }
 
   @Get(':id')

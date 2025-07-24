@@ -7,6 +7,7 @@ import {
   Delete,
   BadRequestException,
   Put,
+  Request,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerEntity } from './customer.entity/customer.entity';
@@ -28,8 +29,11 @@ export class CustomerController {
   }
 
   @Get()
-  findAll(): Promise<CustomerEntity[]> {
-    return this.customerService.findAll();
+  // Add JWT guard if not present
+  findAll(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<CustomerEntity[]> {
+    return this.customerService.findAll(req.user.companyId);
   }
 
   @Get(':id')

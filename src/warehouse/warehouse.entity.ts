@@ -5,40 +5,34 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
-  JoinColumn,
+  OneToMany,
 } from 'typeorm';
-import { CompanyEntity } from '../../company/company.entity/company.entity';
+import { OrderEntity } from '../order/order.entity';
 
-export enum UserRole {
-  OWNER = 'OWNER',
-  OPERATOR = 'OPERATOR',
-  VIEWER = 'VIEWER',
-}
-
-@Entity('users')
-export class UserEntity {
+@Entity('warehouses')
+export class WarehouseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid', name: 'company_id', nullable: false })
   companyId: string;
 
-  @ManyToOne(() => CompanyEntity, (company) => company.users)
-  @JoinColumn({ name: 'company_id' })
-  company: CompanyEntity;
-
-  @Column({ type: 'varchar', nullable: false, unique: true })
-  email: string;
+  @Column({
+    type: 'enum',
+    enum: ['solid', 'liquid'],
+    name: 'type',
+    nullable: true,
+  })
+  type?: 'solid' | 'liquid';
 
   @Column({ type: 'varchar', nullable: false })
-  password: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', nullable: false, default: UserRole.VIEWER })
-  role: UserRole;
+  @Column({ type: 'text', nullable: true })
+  address?: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.warehouse)
+  orders: OrderEntity[];
 
   @CreateDateColumn({
     name: 'created_at',
@@ -46,7 +40,7 @@ export class UserEntity {
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt?: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
@@ -54,8 +48,11 @@ export class UserEntity {
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
   })
-  updatedAt?: Date;
+  updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt?: Date;
+
+  @Column({ type: 'uuid', name: 'modified_by', nullable: true })
+  modifiedBy?: string;
 }

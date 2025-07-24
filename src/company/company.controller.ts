@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CompanyEntity } from './company.entity/company.entity';
+import { CompanyEntity } from './company.entity';
 import { CompanySchema } from './company.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 

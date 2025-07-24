@@ -7,12 +7,11 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import { OrderEntity } from '../../order/order.entity/order.entity';
-import { CustomerEntity } from '../../customer/customer.entity/customer.entity';
-import { UserEntity } from '../../user/user.entity/user.entity';
-import { ProductEntity } from '../../product/product.entity/product.entity';
-import { InvoiceEntity } from '../../invoice/invoice.entity/invoice.entity';
-// Add similar imports for WarehouseEntity as needed
+import { OrderEntity } from '../order/order.entity';
+import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { UserEntity } from '../user/user.entity';
+import { ProductEntity } from '../product/product.entity';
+import { InvoiceEntity } from '../invoice/invoice.entity';
 
 @Entity('companies')
 export class CompanyEntity {
@@ -43,10 +42,9 @@ export class CompanyEntity {
   @OneToMany(() => UserEntity, (user) => user.company)
   users: UserEntity[];
 
-  @OneToMany(() => ProductEntity, (product) => product.company)
-  products: ProductEntity[];
+  @OneToMany(() => ProductEntity, (product: ProductEntity) => product.company)
+  products: ProductEntity;
 
   @OneToMany(() => InvoiceEntity, (invoice) => invoice.company)
   invoices: InvoiceEntity[];
-  // Add similar OneToMany for warehouses, invoices
 }

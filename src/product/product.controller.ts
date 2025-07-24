@@ -7,9 +7,10 @@ import {
   Put,
   Delete,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { ProductEntity } from './product.entity/product.entity';
+import { ProductEntity } from './product.entity';
 import { ProductSchema } from './product.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 
@@ -28,8 +29,11 @@ export class ProductController {
   }
 
   @Get()
-  findAll(): Promise<ProductEntity[]> {
-    return this.productService.findAll();
+  // Add JWT guard if not present
+  findAll(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ProductEntity[]> {
+    return this.productService.findAll(req.user.companyId);
   }
 
   @Get(':id')

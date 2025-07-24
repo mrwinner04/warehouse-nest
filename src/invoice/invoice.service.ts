@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { InvoiceEntity } from './invoice.entity/invoice.entity';
+import { InvoiceEntity } from './invoice.entity';
 
 @Injectable()
 export class InvoiceService {
@@ -27,8 +27,8 @@ export class InvoiceService {
     return this.invoiceRepository.save(invoice);
   }
 
-  findAll(): Promise<InvoiceEntity[]> {
-    return this.invoiceRepository.find();
+  findAll(companyId: string): Promise<InvoiceEntity[]> {
+    return this.invoiceRepository.find({ where: { companyId } });
   }
 
   findOne(id: string): Promise<InvoiceEntity | null> {

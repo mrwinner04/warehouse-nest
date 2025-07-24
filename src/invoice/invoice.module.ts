@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
-import { InvoiceEntity } from './invoice.entity/invoice.entity';
+import { InvoiceEntity } from './invoice.entity';
 import { OrderModule } from '../order/order.module';
 
 @Module({

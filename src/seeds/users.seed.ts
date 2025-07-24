@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity, UserRole } from '../user/user.entity/user.entity';
+import { UserEntity, UserRole } from '../user/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { faker } from '@faker-js/faker';
 

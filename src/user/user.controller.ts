@@ -8,19 +8,36 @@ import {
   Delete,
   UseGuards,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserEntity } from './user.entity/user.entity';
-import { UserSchema } from './user.zod';
+import { UserEntity } from './user.entity';
+import { UserSchema } from './user.static';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { UserRole } from './user.entity/user.entity';
+import { UserRole } from './user.entity';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { JwtServiceCustom } from '../auth/jwt.service';
+import { Public } from '../auth/public.decorator';
+
+// Helper function to safely convert string to UserRole enum
+function toUserRole(role: unknown): UserRole | undefined {
+  if (
+    typeof role === 'string' &&
+    (role === 'OWNER' || role === 'OPERATOR' || role === 'VIEWER')
+  ) {
+    return UserRole[role];
+  }
+  return undefined;
+}
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtServiceCustom: JwtServiceCustom,
+  ) {}
 
   @Post('register')
   @HttpCode(201)
@@ -35,10 +52,38 @@ export class UserController {
       ...result.data,
       role: result.data.role ? UserRole[result.data.role] : undefined,
     };
-    return this.userService.register(userData);
+    // Use JwtServiceCustom for registration
+    return this.jwtServiceCustom.register(userData);
+  }
+  @Public()
+  @Post('public-register')
+  @HttpCode(201)
+  async publicRegister(
+    @Body() data: Partial<UserEntity> & { companyName: string },
+  ): Promise<Omit<UserEntity, 'password'>> {
+    console.log('public-register body:', data); // Debug log
+    const { companyName, ...userData } = data;
+    if (!companyName) {
+      throw new BadRequestException('companyName is required');
+    }
+    // Omit companyId from validation for public register
+    const result = UserSchema.omit({ companyId: true }).safeParse(userData);
+    if (!result.success) {
+      throw new BadRequestException(result.error);
+    }
+    const safeUserData: Partial<UserEntity> = {
+      ...result.data,
+      role: toUserRole(result.data.role),
+    };
+
+    console.log('Public register data:', safeUserData, companyName);
+
+    return this.jwtServiceCustom.publicRegister(safeUserData, companyName);
   }
 
+  @Public()
   @Post('login')
+  @HttpCode(200)
   async login(
     @Body() body: { email: string; password: string },
   ): Promise<{ accessToken: string }> {
@@ -48,14 +93,37 @@ export class UserController {
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.userService.login(result.data.email, result.data.password);
+    // Use JwtServiceCustom for login
+    return this.jwtServiceCustom.login(result.data.email, result.data.password);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.OWNER)
+  @Post('add-to-company')
+  @HttpCode(201)
+  async addUserToCompany(
+    @Body() data: Partial<UserEntity>,
+    @Request() req: { user: UserEntity },
+  ): Promise<Omit<UserEntity, 'password'>> {
+    // Omit companyId from validation for add-to-company
+    const result = UserSchema.omit({ companyId: true }).safeParse(data);
+    if (!result.success) {
+      throw new BadRequestException(result.error);
+    }
+    // Convert string role to UserRole enum if present
+    const userData: Partial<UserEntity> = {
+      ...result.data,
+      role: toUserRole(result.data.role),
+    };
+    // req.user is set by JwtAuthGuard
+    const ownerUser = req.user;
+    return this.jwtServiceCustom.registerUserToCompany(userData, ownerUser);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Get()
-  findAll(): Promise<UserEntity[]> {
-    return this.userService.findAll();
+  findAll(@Request() req: { user: UserEntity }): Promise<UserEntity[]> {
+    return this.userService.findAll(req.user.companyId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

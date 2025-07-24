@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { ProductEntity } from '../product/product.entity/product.entity';
+import { ProductEntity } from '../product/product.entity';
 import { faker } from '@faker-js/faker';
 
 export async function seedProducts(

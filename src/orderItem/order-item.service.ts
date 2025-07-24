@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OrderItemEntity } from './order-item.entity/order-item.entity';
+import { OrderItemEntity } from './order-item.entity';
 
 @Injectable()
 export class OrderItemService {
@@ -24,8 +24,12 @@ export class OrderItemService {
     return this.orderItemRepository.save(orderItem);
   }
 
-  findAll(): Promise<OrderItemEntity[]> {
-    return this.orderItemRepository.find();
+  async findAll(companyId: string): Promise<OrderItemEntity[]> {
+    return this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
+      .where('order.companyId = :companyId', { companyId })
+      .getMany();
   }
 
   findOne(id: string): Promise<OrderItemEntity | null> {

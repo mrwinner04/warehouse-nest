@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductEntity } from './product.entity/product.entity';
+import { ProductEntity } from './product.entity';
 
 @Injectable()
 export class ProductService {
@@ -26,8 +26,8 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  findAll(): Promise<ProductEntity[]> {
-    return this.productRepository.find();
+  findAll(companyId: string): Promise<ProductEntity[]> {
+    return this.productRepository.find({ where: { companyId } });
   }
 
   findOne(id: string): Promise<ProductEntity | null> {

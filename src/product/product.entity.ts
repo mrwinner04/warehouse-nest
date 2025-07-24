@@ -9,8 +9,8 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { CompanyEntity } from '../../company/company.entity/company.entity';
-import { OrderItemEntity } from '../../orderItem/order-item.entity/order-item.entity';
+import { CompanyEntity } from '../company/company.entity';
+import { OrderItemEntity } from '../orderItem/order-item.entity';
 
 @Entity('products')
 export class ProductEntity {

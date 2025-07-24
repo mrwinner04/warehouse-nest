@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WarehouseEntity } from './warehouse.entity/warehouse.entity';
+import { WarehouseEntity } from './warehouse.entity';
 
+//da mahna papkite entiti i da smenq zoda da byde prosto static
 @Injectable()
 export class WarehouseService {
   constructor(
@@ -24,8 +25,8 @@ export class WarehouseService {
     return this.warehouseRepository.save(warehouse);
   }
 
-  findAll(): Promise<WarehouseEntity[]> {
-    return this.warehouseRepository.find();
+  findAll(companyId: string): Promise<WarehouseEntity[]> {
+    return this.warehouseRepository.find({ where: { companyId } });
   }
 
   findOne(id: string): Promise<WarehouseEntity | null> {

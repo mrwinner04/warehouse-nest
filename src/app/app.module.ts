@@ -10,19 +10,43 @@ import { OrderModule } from '../order/order.module';
 import { OrderItemModule } from '../orderItem/order-item.module';
 import { InvoiceModule } from 'src/invoice/invoice.module';
 import { AuthModule } from '../auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { z } from 'zod';
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASS || 'postgres',
-      database: process.env.DB_NAME || 'warehouse_nest',
-      autoLoadEntities: true,
-      synchronize: false,
-      namingStrategy: new SnakeNamingStrategy(),
-    }),
+    (() => {
+      // Zod schema for DB config validation
+      const DbConfigSchema = z.object({
+        type: z.literal('postgres'),
+        host: z.string(),
+        port: z.number().int().min(1),
+        username: z.string(),
+        password: z.string(),
+        database: z.string(),
+        autoLoadEntities: z.boolean(),
+        synchronize: z.boolean(),
+        namingStrategy: z.any(),
+      });
+      const dbConfig = {
+        type: 'postgres' as const,
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        username: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASS || 'postgres',
+        database: process.env.DB_NAME || 'warehouse_nest',
+        autoLoadEntities: true,
+        synchronize: false,
+        namingStrategy: new SnakeNamingStrategy(),
+      };
+      // Validate config
+      const result = DbConfigSchema.safeParse(dbConfig);
+      if (!result.success) {
+        throw new Error('Invalid DB config: ' + result.error.message);
+      }
+      return TypeOrmModule.forRoot(dbConfig);
+    })(),
     CompanyModule,
     UserModule,
     CustomerModule,
@@ -32,6 +56,16 @@ import { AuthModule } from '../auth/auth.module';
     OrderItemModule,
     InvoiceModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

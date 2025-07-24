@@ -8,8 +8,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { CompanyEntity } from '../../company/company.entity/company.entity';
-import { OrderEntity } from '../../order/order.entity/order.entity';
+import { CompanyEntity } from '../company/company.entity';
+import { OrderEntity } from '../order/order.entity';
 
 @Entity('invoices')
 export class InvoiceEntity {

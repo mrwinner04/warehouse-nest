@@ -6,9 +6,10 @@ import {
   Param,
   Delete,
   Put,
+  Request,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { OrderEntity } from './order.entity/order.entity';
+import { OrderEntity } from './order.entity';
 import { OrderSchema } from './order.zod';
 import { BadRequestException } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
@@ -28,8 +29,11 @@ export class OrderController {
   }
 
   @Get()
-  findAll(): Promise<OrderEntity[]> {
-    return this.orderService.findAll();
+  // Add JWT guard if not present
+  findAll(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<OrderEntity[]> {
+    return this.orderService.findAll(req.user.companyId);
   }
 
   @Get(':id')

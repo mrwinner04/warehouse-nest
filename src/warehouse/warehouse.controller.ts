@@ -7,11 +7,14 @@ import {
   Put,
   Delete,
   BadRequestException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
-import { WarehouseEntity } from './warehouse.entity/warehouse.entity';
+import { WarehouseEntity } from './warehouse.entity';
 import { WarehouseSchema } from './warehouse.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -30,8 +33,11 @@ export class WarehouseController {
   }
 
   @Get()
-  findAll(): Promise<WarehouseEntity[]> {
-    return this.warehouseService.findAll();
+  @UseGuards(JwtAuthGuard)
+  findAll(
+    @Request() req: { user: { companyId: string } },
+  ): Promise<WarehouseEntity[]> {
+    return this.warehouseService.findAll(req.user.companyId);
   }
 
   @Get(':id')
