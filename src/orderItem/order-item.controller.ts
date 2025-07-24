@@ -13,6 +13,8 @@ import { OrderItemService } from './order-item.service';
 import { OrderItemEntity } from './order-item.entity';
 import { OrderItemSchema } from './order-item.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/user.entity';
 
 @Controller('order-item')
 export class OrderItemController {
@@ -59,5 +61,13 @@ export class OrderItemController {
   @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.orderItemService.remove(id);
+  }
+
+  // Hard delete an order item by ID (OWNER only)
+  @Delete(':id/hard')
+  @Roles(UserRole.OWNER)
+  @HttpCode(204)
+  hardRemove(@Param('id') id: string): Promise<void> {
+    return this.orderItemService.hardRemove(id);
   }
 }

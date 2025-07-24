@@ -56,4 +56,8 @@ export class OrderItemService {
   async remove(id: string): Promise<void> {
     await this.orderItemRepository.softDelete(id);
   }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.orderItemRepository.delete(id);
+  }
 }

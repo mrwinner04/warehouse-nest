@@ -25,8 +25,22 @@ export class WarehouseService {
     return this.warehouseRepository.save(warehouse);
   }
 
-  findAll(companyId: string): Promise<WarehouseEntity[]> {
-    return this.warehouseRepository.find({ where: { companyId } });
+  async findAll(
+    companyId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    data: WarehouseEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.warehouseRepository.findAndCount({
+      where: { companyId },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total, page, limit };
   }
 
   findOne(id: string): Promise<WarehouseEntity | null> {
@@ -52,5 +66,9 @@ export class WarehouseService {
 
   async remove(id: string): Promise<void> {
     await this.warehouseRepository.softDelete(id);
+  }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.warehouseRepository.delete(id);
   }
 }

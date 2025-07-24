@@ -7,12 +7,15 @@ import {
   Delete,
   Put,
   Request,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderEntity } from './order.entity';
 import { OrderSchema } from './order.zod';
 import { BadRequestException } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/user.entity';
 
 @Controller('order')
 export class OrderController {
@@ -32,8 +35,12 @@ export class OrderController {
   // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
-  ): Promise<OrderEntity[]> {
-    return this.orderService.findAll(req.user.companyId);
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.orderService.findAll(req.user.companyId, pageNum, limitNum);
   }
 
   @Get(':id')
@@ -57,5 +64,13 @@ export class OrderController {
   @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.orderService.remove(id);
+  }
+
+  // Hard delete an order by ID (OWNER only)
+  @Delete(':id/hard')
+  @Roles(UserRole.OWNER)
+  @HttpCode(204)
+  hardRemove(@Param('id') id: string): Promise<void> {
+    return this.orderService.hardRemove(id);
   }
 }

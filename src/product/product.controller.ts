@@ -8,11 +8,14 @@ import {
   Delete,
   BadRequestException,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductEntity } from './product.entity';
 import { ProductSchema } from './product.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/user.entity';
 
 @Controller('product')
 export class ProductController {
@@ -32,8 +35,18 @@ export class ProductController {
   // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
-  ): Promise<ProductEntity[]> {
-    return this.productService.findAll(req.user.companyId);
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('name') name?: string,
+    @Query('code') code?: string,
+  ) {
+    // Parse pagination params
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.productService.findAll(req.user.companyId, pageNum, limitNum, {
+      name,
+      code,
+    });
   }
 
   @Get(':id')
@@ -58,5 +71,13 @@ export class ProductController {
   @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.productService.remove(id);
+  }
+
+  // Hard delete a product by ID (OWNER only)
+  @Delete(':id/hard')
+  @Roles(UserRole.OWNER)
+  @HttpCode(204)
+  hardRemove(@Param('id') id: string): Promise<void> {
+    return this.productService.hardRemove(id);
   }
 }

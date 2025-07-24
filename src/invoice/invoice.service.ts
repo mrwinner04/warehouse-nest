@@ -27,8 +27,22 @@ export class InvoiceService {
     return this.invoiceRepository.save(invoice);
   }
 
-  findAll(companyId: string): Promise<InvoiceEntity[]> {
-    return this.invoiceRepository.find({ where: { companyId } });
+  async findAll(
+    companyId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    data: InvoiceEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.invoiceRepository.findAndCount({
+      where: { companyId },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total, page, limit };
   }
 
   findOne(id: string): Promise<InvoiceEntity | null> {
@@ -54,5 +68,9 @@ export class InvoiceService {
 
   async remove(id: string): Promise<void> {
     await this.invoiceRepository.softDelete(id);
+  }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.invoiceRepository.delete(id);
   }
 }

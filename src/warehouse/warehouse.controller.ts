@@ -9,12 +9,15 @@ import {
   BadRequestException,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { WarehouseEntity } from './warehouse.entity';
 import { WarehouseSchema } from './warehouse.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/user.entity';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -36,8 +39,12 @@ export class WarehouseController {
   @UseGuards(JwtAuthGuard)
   findAll(
     @Request() req: { user: { companyId: string } },
-  ): Promise<WarehouseEntity[]> {
-    return this.warehouseService.findAll(req.user.companyId);
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.warehouseService.findAll(req.user.companyId, pageNum, limitNum);
   }
 
   @Get(':id')
@@ -61,5 +68,13 @@ export class WarehouseController {
   @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.warehouseService.remove(id);
+  }
+
+  // Hard delete a warehouse by ID (OWNER only)
+  @Delete(':id/hard')
+  @Roles(UserRole.OWNER)
+  @HttpCode(204)
+  hardRemove(@Param('id') id: string): Promise<void> {
+    return this.warehouseService.hardRemove(id);
   }
 }

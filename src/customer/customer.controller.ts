@@ -8,11 +8,14 @@ import {
   BadRequestException,
   Put,
   Request,
+  Query,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerEntity } from './customer.entity/customer.entity';
 import { CustomerSchema } from './customer.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/user.entity';
 
 @Controller('customer')
 export class CustomerController {
@@ -32,8 +35,12 @@ export class CustomerController {
   // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
-  ): Promise<CustomerEntity[]> {
-    return this.customerService.findAll(req.user.companyId);
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.customerService.findAll(req.user.companyId, pageNum, limitNum);
   }
 
   @Get(':id')
@@ -57,5 +64,13 @@ export class CustomerController {
   @HttpCode(204)
   remove(@Param('id') id: string): Promise<void> {
     return this.customerService.remove(id);
+  }
+
+  // Hard delete a customer by ID (OWNER only)
+  @Delete(':id/hard')
+  @Roles(UserRole.OWNER)
+  @HttpCode(204)
+  hardRemove(@Param('id') id: string): Promise<void> {
+    return this.customerService.hardRemove(id);
   }
 }

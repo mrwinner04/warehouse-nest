@@ -26,8 +26,31 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  findAll(companyId: string): Promise<ProductEntity[]> {
-    return this.productRepository.find({ where: { companyId } });
+  async findAll(
+    companyId: string,
+    page = 1,
+    limit = 20,
+    filters: { name?: string; code?: string } = {},
+  ): Promise<{
+    data: ProductEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .where('product.companyId = :companyId', { companyId });
+    if (filters.name) {
+      query.andWhere('product.name ILIKE :name', { name: `%${filters.name}%` });
+    }
+    if (filters.code) {
+      query.andWhere('product.code ILIKE :code', { code: `%${filters.code}%` });
+    }
+    const [data, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    return { data, total, page, limit };
   }
 
   findOne(id: string): Promise<ProductEntity | null> {
@@ -55,5 +78,9 @@ export class ProductService {
 
   async remove(id: string): Promise<void> {
     await this.productRepository.softDelete(id);
+  }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.productRepository.delete(id);
   }
 }

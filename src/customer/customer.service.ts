@@ -24,8 +24,22 @@ export class CustomerService {
     return this.customerRepository.save(customer);
   }
 
-  findAll(companyId: string): Promise<CustomerEntity[]> {
-    return this.customerRepository.find({ where: { companyId } });
+  async findAll(
+    companyId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    data: CustomerEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.customerRepository.findAndCount({
+      where: { companyId },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total, page, limit };
   }
 
   findOne(id: string): Promise<CustomerEntity | null> {
@@ -51,5 +65,9 @@ export class CustomerService {
 
   async remove(id: string): Promise<void> {
     await this.customerRepository.softDelete(id);
+  }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.customerRepository.delete(id);
   }
 }

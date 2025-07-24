@@ -45,8 +45,22 @@ export class OrderService {
     return savedOrder;
   }
 
-  findAll(companyId: string): Promise<OrderEntity[]> {
-    return this.orderRepository.find({ where: { companyId } });
+  async findAll(
+    companyId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    data: OrderEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const [data, total] = await this.orderRepository.findAndCount({
+      where: { companyId },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total, page, limit };
   }
 
   findOne(id: string): Promise<OrderEntity | null> {
@@ -72,5 +86,9 @@ export class OrderService {
 
   async remove(id: string): Promise<void> {
     await this.orderRepository.softDelete(id);
+  }
+
+  async hardRemove(id: string): Promise<void> {
+    await this.orderRepository.delete(id);
   }
 }
