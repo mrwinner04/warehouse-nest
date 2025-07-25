@@ -14,14 +14,14 @@ import { ProductService } from './product.service';
 import { ProductEntity } from './product.entity';
 import { ProductSchema } from './product.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../decorator/roles.decorator';
 import { UserRole } from '../user/user.entity';
 import {
   BestsellingProduct,
   ClientWithMostOrders,
   ProductWithHighestStock,
-} from './product.reports';
-import { ProductReportService } from './product.report.service';
+} from './report/product.reports';
+import { ProductReportService } from './report/product.report.service';
 import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('product')

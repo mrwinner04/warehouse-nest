@@ -14,7 +14,7 @@ import { InvoiceService } from './invoice.service';
 import { InvoiceEntity } from './invoice.entity';
 import { InvoiceSchema } from './invoice.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../decorator/roles.decorator';
 import { UserRole } from '../user/user.entity';
 import { ZodValidationPipe } from '../zod.validation.pipe';
 
@@ -34,7 +34,6 @@ export class InvoiceController {
   }
 
   @Get()
-  // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
     @Query('page') page?: string,

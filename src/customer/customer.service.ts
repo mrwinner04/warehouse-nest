@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomerEntity } from './customer.entity';
-import { assertNotExists } from '../common.utils';
+import { assertNotExists } from '../common/common.utils';
 import { validateCompanyAccess } from '../common/company-access.utils';
 
 @Injectable()

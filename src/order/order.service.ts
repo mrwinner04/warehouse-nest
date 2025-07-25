@@ -63,7 +63,6 @@ export class OrderService {
     return { data, total, page, limit };
   }
 
-  // Updated to throw proper errors instead of returning null
   async findOne(id: string, companyId: string): Promise<OrderEntity> {
     return validateCompanyAccess(
       () => this.orderRepository.findOneBy({ id }),
@@ -72,7 +71,6 @@ export class OrderService {
     );
   }
 
-  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<OrderEntity>,
@@ -88,27 +86,20 @@ export class OrderService {
       );
     }
 
-    // First validate access
     await this.findOne(id, companyId);
 
-    // Update the entity
     await this.orderRepository.update({ id, companyId }, data);
 
-    // Return the updated entity
     return this.findOne(id, companyId);
   }
 
-  // Updated to throw proper errors
   async remove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.orderRepository.softDelete({ id, companyId });
   }
 
-  // Updated to throw proper errors
   async hardRemove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.orderRepository.delete({ id, companyId });

@@ -22,7 +22,6 @@ export class UserService {
     return this.userRepository.find({ where: { companyId } });
   }
 
-  // Updated to throw proper errors instead of returning null
   async findOne(id: string, companyId: string): Promise<UserEntity> {
     return validateCompanyAccess(
       () => this.userRepository.findOneBy({ id }),
@@ -31,7 +30,6 @@ export class UserService {
     );
   }
 
-  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<UserEntity>,
@@ -41,19 +39,14 @@ export class UserService {
       data.password = await bcrypt.hash(data.password, 10);
     }
 
-    // First validate access
     await this.findOne(id, companyId);
 
-    // Update the entity
     await this.userRepository.update({ id, companyId }, data);
 
-    // Return the updated entity
     return this.findOne(id, companyId);
   }
 
-  // Updated to throw proper errors
   async remove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.userRepository.softDelete({ id, companyId });

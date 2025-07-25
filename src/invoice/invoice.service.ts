@@ -24,15 +24,9 @@ export class InvoiceService {
         number,
       });
       if (!existing) break;
-      // If duplicate, always generate a new number and retry
       number = `INV-${Date.now()}-${nanoid(8)}`;
       tries++;
     }
-    // if (tries === 10) {
-    //   throw new Error(
-    //     'Could not generate a unique invoice number after 10 tries',
-    //   );
-    // }
     data.number = number;
     if (!data.date) {
       data.date = new Date();
@@ -59,7 +53,6 @@ export class InvoiceService {
     return { data, total, page, limit };
   }
 
-  // Updated to throw proper errors instead of returning null
   async findOne(id: string, companyId: string): Promise<InvoiceEntity> {
     return validateCompanyAccess(
       () => this.invoiceRepository.findOneBy({ id }),
@@ -68,7 +61,6 @@ export class InvoiceService {
     );
   }
 
-  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<InvoiceEntity>,
@@ -84,27 +76,20 @@ export class InvoiceService {
       );
     }
 
-    // First validate access
     await this.findOne(id, companyId);
 
-    // Update the entity
     await this.invoiceRepository.update({ id, companyId }, data);
 
-    // Return the updated entity
     return this.findOne(id, companyId);
   }
 
-  // Updated to throw proper errors
   async remove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.invoiceRepository.softDelete({ id, companyId });
   }
 
-  // Updated to throw proper errors
   async hardRemove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.invoiceRepository.delete({ id, companyId });

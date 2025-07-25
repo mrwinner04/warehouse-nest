@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductEntity } from './product.entity';
-import { OrderItemEntity } from '../orderItem/order-item.entity';
+import { ProductEntity } from '..//product.entity';
+import { OrderItemEntity } from '../../orderItem/order-item.entity';
 import {
   BestsellingProduct,
   ClientWithMostOrders,

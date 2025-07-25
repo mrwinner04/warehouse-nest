@@ -16,11 +16,11 @@ import { UserEntity } from './user.entity';
 import { UserSchema } from './user.static';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../decorator/roles.decorator';
 import { UserRole } from './user.entity';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { JwtServiceCustom } from '../auth/jwt.service';
-import { Public } from '../auth/public.decorator';
+import { Public } from '../decorator/public.decorator';
 import { ZodValidationPipe } from '../zod.validation.pipe';
 
 function toUserRole(role: unknown): UserRole | undefined {

@@ -52,7 +52,6 @@ export class OrderItemService {
     return orderItem;
   }
 
-  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<OrderItemEntity>,
@@ -68,27 +67,20 @@ export class OrderItemService {
       );
     }
 
-    // First validate access
     await this.findOne(id, companyId);
 
-    // Update the entity
     await this.orderItemRepository.update(id, data);
 
-    // Return the updated entity
     return this.findOne(id, companyId);
   }
 
-  // Updated to throw proper errors
   async remove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.orderItemRepository.softDelete(id);
   }
 
-  // Updated to throw proper errors
   async hardRemove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.orderItemRepository.delete(id);

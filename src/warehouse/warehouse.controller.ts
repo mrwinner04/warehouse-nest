@@ -16,7 +16,7 @@ import { WarehouseEntity } from './warehouse.entity';
 import { WarehouseSchema } from './warehouse.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../decorator/roles.decorator';
 import { UserRole } from '../user/user.entity';
 import { ZodValidationPipe } from '../zod.validation.pipe';
 

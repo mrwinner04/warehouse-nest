@@ -74,7 +74,7 @@ export class DevController {
       Array.from({ length: 5 }).map((_, index) =>
         this.orderService.create({
           companyId,
-          number: `ORD-${Date.now()}-${index}-${nanoid(8)}`, // Ensure unique order numbers
+          number: `ORD-${Date.now()}-${index}-${nanoid(8)}`,
           type: faker.helpers.arrayElement(['sales', 'purchase', 'transfer']),
           customerId: faker.helpers.arrayElement(customers).id,
           warehouseId: faker.helpers.arrayElement(warehouses).id,

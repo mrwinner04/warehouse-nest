@@ -14,7 +14,7 @@ import { CustomerService } from './customer.service';
 import { CustomerEntity } from './customer.entity';
 import { CustomerSchema } from './customer.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../decorator/roles.decorator';
 import { UserRole } from '../user/user.entity';
 import { ZodValidationPipe } from '../zod.validation.pipe';
 

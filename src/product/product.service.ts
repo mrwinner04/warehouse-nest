@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductEntity } from './product.entity';
-import { assertNotExists } from '../common.utils';
+import { assertNotExists } from '../common/common.utils';
 import { validateCompanyAccess } from '../common/company-access.utils';
 
 @Injectable()
@@ -51,7 +51,6 @@ export class ProductService {
     return { data, total, page, limit };
   }
 
-  // Updated to throw proper errors instead of returning null
   async findOne(id: string, companyId: string): Promise<ProductEntity> {
     return validateCompanyAccess(
       () => this.productRepository.findOneBy({ id }),
@@ -60,7 +59,6 @@ export class ProductService {
     );
   }
 
-  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<ProductEntity>,
@@ -75,27 +73,20 @@ export class ProductService {
       );
     }
 
-    // First validate access
     await this.findOne(id, companyId);
 
-    // Update the entity
     await this.productRepository.update({ id, companyId }, data);
 
-    // Return the updated entity
     return this.findOne(id, companyId);
   }
 
-  // Updated to throw proper errors
   async remove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.productRepository.softDelete({ id, companyId });
   }
 
-  // Updated to throw proper errors
   async hardRemove(id: string, companyId: string): Promise<void> {
-    // First validate access
     await this.findOne(id, companyId);
 
     await this.productRepository.delete({ id, companyId });
