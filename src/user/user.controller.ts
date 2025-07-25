@@ -9,6 +9,7 @@ import {
   UseGuards,
   BadRequestException,
   Request,
+  UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
@@ -20,8 +21,8 @@ import { UserRole } from './user.entity';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { JwtServiceCustom } from '../auth/jwt.service';
 import { Public } from '../auth/public.decorator';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
-// Helper function to safely convert string to UserRole enum
 function toUserRole(role: unknown): UserRole | undefined {
   if (
     typeof role === 'string' &&
@@ -41,16 +42,13 @@ export class UserController {
 
   @Post('register')
   @HttpCode(201)
+  @UsePipes(new ZodValidationPipe(UserSchema))
   async register(
     @Body() data: Partial<UserEntity>,
   ): Promise<Omit<UserEntity, 'password'>> {
-    const result = UserSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
     const userData: Partial<UserEntity> = {
-      ...result.data,
-      role: result.data.role ? UserRole[result.data.role] : undefined,
+      ...data,
+      role: data.role ? UserRole[data.role] : undefined,
     };
     // Use JwtServiceCustom for registration
     return this.jwtServiceCustom.register(userData);
@@ -84,18 +82,15 @@ export class UserController {
   @Public()
   @Post('login')
   @HttpCode(200)
+  @UsePipes(
+    new ZodValidationPipe(UserSchema.pick({ email: true, password: true })),
+  )
   async login(
     @Body() body: { email: string; password: string },
   ): Promise<{ accessToken: string }> {
-    const result = UserSchema.pick({ email: true, password: true }).safeParse(
-      body,
-    );
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    // Use JwtServiceCustom for login
-    return this.jwtServiceCustom.login(result.data.email, result.data.password);
+    return this.jwtServiceCustom.login(body.email, body.password);
   }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER)
   @Post('add-to-company')

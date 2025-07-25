@@ -3,6 +3,12 @@ import { ProductService } from '../product/product.service';
 import { WarehouseService } from '../warehouse/warehouse.service';
 import { CustomerService } from '../customer/customer.service';
 import { OrderService } from '../order/order.service';
+import { OrderItemService } from '../orderItem/order-item.service';
+import { ProductEntity } from '../product/product.entity';
+import { WarehouseEntity } from '../warehouse/warehouse.entity';
+import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { OrderEntity } from '../order/order.entity';
+import { OrderItemEntity } from '../orderItem/order-item.entity';
 import { faker } from '@faker-js/faker';
 import { nanoid } from 'nanoid';
 
@@ -13,14 +19,21 @@ export class DevController {
     private readonly warehouseService: WarehouseService,
     private readonly customerService: CustomerService,
     private readonly orderService: OrderService,
+    private readonly orderItemService: OrderItemService,
   ) {}
 
   @Post('generate-demo-data')
-  async generateDemoData(@Body() body: { companyId: string }) {
+  async generateDemoData(@Body() body: { companyId: string }): Promise<{
+    products: string[];
+    warehouses: string[];
+    customers: string[];
+    orders: string[];
+    orderItems: string[];
+  }> {
     const { companyId } = body;
 
     // Generate 5 products
-    const products = await Promise.all(
+    const products: ProductEntity[] = await Promise.all(
       Array.from({ length: 5 }).map(() =>
         this.productService.create({
           companyId,
@@ -33,7 +46,7 @@ export class DevController {
     );
 
     // Generate 5 warehouses
-    const warehouses = await Promise.all(
+    const warehouses: WarehouseEntity[] = await Promise.all(
       Array.from({ length: 5 }).map(() =>
         this.warehouseService.create({
           companyId,
@@ -45,7 +58,7 @@ export class DevController {
     );
 
     // Generate 5 customers
-    const customers = await Promise.all(
+    const customers: CustomerEntity[] = await Promise.all(
       Array.from({ length: 5 }).map(() =>
         this.customerService.create({
           companyId,
@@ -57,7 +70,7 @@ export class DevController {
     );
 
     // Generate 5 orders with unique order numbers
-    const orders = await Promise.all(
+    const orders: OrderEntity[] = await Promise.all(
       Array.from({ length: 5 }).map((_, index) =>
         this.orderService.create({
           companyId,
@@ -70,11 +83,38 @@ export class DevController {
       ),
     );
 
+    // Generate order items for each order
+    const orderItems: OrderItemEntity[] = [];
+    for (const order of orders) {
+      const numItems = faker.number.int({ min: 1, max: 3 });
+      const usedProductIds = new Set<string>();
+      for (let i = 0; i < numItems; i++) {
+        let product: ProductEntity;
+        do {
+          product = faker.helpers.arrayElement(products);
+        } while (
+          usedProductIds.has(product.id) &&
+          usedProductIds.size < products.length
+        );
+        usedProductIds.add(product.id);
+        const quantity = faker.number.int({ min: 1, max: 10 });
+        orderItems.push(
+          await this.orderItemService.create({
+            orderId: order.id,
+            productId: product.id,
+            quantity,
+            price: product.price,
+          }),
+        );
+      }
+    }
+
     return {
       products: products.map((p) => p.id),
       warehouses: warehouses.map((w) => w.id),
       customers: customers.map((c) => c.id),
       orders: orders.map((o) => o.id),
+      orderItems: orderItems.map((oi) => oi.id),
     };
   }
 }

@@ -10,6 +10,8 @@ import { WarehouseEntity } from '../warehouse/warehouse.entity';
 import { CustomerEntity } from '../customer/customer.entity/customer.entity';
 import { OrderEntity } from '../order/order.entity';
 import { InvoiceModule } from 'src/invoice/invoice.module';
+import { OrderItemService } from '../orderItem/order-item.service';
+import { OrderItemEntity } from '../orderItem/order-item.entity';
 
 @Module({
   imports: [
@@ -18,10 +20,17 @@ import { InvoiceModule } from 'src/invoice/invoice.module';
       WarehouseEntity,
       CustomerEntity,
       OrderEntity,
+      OrderItemEntity,
     ]),
     InvoiceModule,
   ],
   controllers: [DevController],
-  providers: [ProductService, WarehouseService, CustomerService, OrderService],
+  providers: [
+    ProductService,
+    WarehouseService,
+    CustomerService,
+    OrderService,
+    OrderItemService,
+  ],
 })
 export class DevModule {}
