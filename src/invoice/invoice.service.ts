@@ -2,6 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InvoiceEntity } from './invoice.entity';
+import { nanoid } from 'nanoid';
+import { validateCompanyAccess } from '../common/company-access.utils';
 
 @Injectable()
 export class InvoiceService {
@@ -11,15 +13,27 @@ export class InvoiceService {
   ) {}
 
   async create(data: Partial<InvoiceEntity>): Promise<InvoiceEntity> {
-    const existing = await this.invoiceRepository.findOneBy({
-      companyId: data.companyId,
-      number: data.number,
-    });
-    if (existing) {
-      throw new BadRequestException(
-        'An invoice with this number already exists for this company',
-      );
+    let number = data.number;
+    let tries = 0;
+    while (tries < 10) {
+      if (!number && data.companyId) {
+        number = `INV-${Date.now()}-${nanoid(8)}`;
+      }
+      const existing = await this.invoiceRepository.findOneBy({
+        companyId: data.companyId,
+        number,
+      });
+      if (!existing) break;
+      // If duplicate, always generate a new number and retry
+      number = `INV-${Date.now()}-${nanoid(8)}`;
+      tries++;
     }
+    // if (tries === 10) {
+    //   throw new Error(
+    //     'Could not generate a unique invoice number after 10 tries',
+    //   );
+    // }
+    data.number = number;
     if (!data.date) {
       data.date = new Date();
     }
@@ -45,16 +59,23 @@ export class InvoiceService {
     return { data, total, page, limit };
   }
 
-  findOne(id: string): Promise<InvoiceEntity | null> {
-    return this.invoiceRepository.findOneBy({ id });
+  // Updated to throw proper errors instead of returning null
+  async findOne(id: string, companyId: string): Promise<InvoiceEntity> {
+    return validateCompanyAccess(
+      () => this.invoiceRepository.findOneBy({ id }),
+      companyId,
+      'Invoice',
+    );
   }
 
+  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<InvoiceEntity>,
-  ): Promise<InvoiceEntity | null> {
+    companyId: string,
+  ): Promise<InvoiceEntity> {
     const existing = await this.invoiceRepository.findOneBy({
-      companyId: data.companyId,
+      companyId,
       number: data.number,
     });
     if (existing && existing.id !== id) {
@@ -62,15 +83,30 @@ export class InvoiceService {
         'An invoice with this number already exists for this company',
       );
     }
-    await this.invoiceRepository.update(id, data);
-    return this.findOne(id);
+
+    // First validate access
+    await this.findOne(id, companyId);
+
+    // Update the entity
+    await this.invoiceRepository.update({ id, companyId }, data);
+
+    // Return the updated entity
+    return this.findOne(id, companyId);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.invoiceRepository.softDelete(id);
+  // Updated to throw proper errors
+  async remove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
+    await this.invoiceRepository.softDelete({ id, companyId });
   }
 
-  async hardRemove(id: string): Promise<void> {
-    await this.invoiceRepository.delete(id);
+  // Updated to throw proper errors
+  async hardRemove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
+    await this.invoiceRepository.delete({ id, companyId });
   }
 }

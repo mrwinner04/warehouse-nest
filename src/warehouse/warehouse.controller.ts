@@ -48,33 +48,43 @@ export class WarehouseController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<WarehouseEntity | null> {
-    return this.warehouseService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<WarehouseEntity> {
+    return this.warehouseService.findOne(id, req.user.companyId);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<WarehouseEntity>,
-  ): Promise<WarehouseEntity | null> {
+    @Request() req: { user: { companyId: string } },
+  ): Promise<WarehouseEntity> {
     const result = WarehouseSchema.partial().safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.warehouseService.update(id, result.data);
+    return this.warehouseService.update(id, result.data, req.user.companyId);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.warehouseService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.warehouseService.remove(id, req.user.companyId);
   }
 
   // Hard delete a warehouse by ID (OWNER only)
   @Delete(':id/hard')
   @Roles(UserRole.OWNER)
   @HttpCode(204)
-  hardRemove(@Param('id') id: string): Promise<void> {
-    return this.warehouseService.hardRemove(id);
+  hardRemove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.warehouseService.hardRemove(id, req.user.companyId);
   }
 }

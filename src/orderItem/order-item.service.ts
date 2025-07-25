@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItemEntity } from './order-item.entity';
@@ -32,14 +36,28 @@ export class OrderItemService {
       .getMany();
   }
 
-  findOne(id: string): Promise<OrderItemEntity | null> {
-    return this.orderItemRepository.findOneBy({ id });
+  // Custom validation for order items since they don't have direct companyId
+  async findOne(id: string, companyId: string): Promise<OrderItemEntity> {
+    const orderItem = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
+      .where('orderItem.id = :id', { id })
+      .andWhere('order.companyId = :companyId', { companyId })
+      .getOne();
+
+    if (!orderItem) {
+      throw new NotFoundException('Order item not found');
+    }
+
+    return orderItem;
   }
 
+  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<OrderItemEntity>,
-  ): Promise<OrderItemEntity | null> {
+    companyId: string,
+  ): Promise<OrderItemEntity> {
     const existing = await this.orderItemRepository.findOneBy({
       orderId: data.orderId,
       productId: data.productId,
@@ -49,15 +67,30 @@ export class OrderItemService {
         'This product is already added to the order',
       );
     }
+
+    // First validate access
+    await this.findOne(id, companyId);
+
+    // Update the entity
     await this.orderItemRepository.update(id, data);
-    return this.findOne(id);
+
+    // Return the updated entity
+    return this.findOne(id, companyId);
   }
 
-  async remove(id: string): Promise<void> {
+  // Updated to throw proper errors
+  async remove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
     await this.orderItemRepository.softDelete(id);
   }
 
-  async hardRemove(id: string): Promise<void> {
+  // Updated to throw proper errors
+  async hardRemove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
     await this.orderItemRepository.delete(id);
   }
 }

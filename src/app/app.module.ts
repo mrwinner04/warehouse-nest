@@ -14,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { z } from 'zod';
+import { DevModule } from '../dev/dev.module'; // Import DevModule for dev endpoints
 @Module({
   imports: [
     (() => {
@@ -56,6 +57,7 @@ import { z } from 'zod';
     OrderItemModule,
     InvoiceModule,
     AuthModule,
+    DevModule, // <-- Remove or comment out in production
   ],
   providers: [
     {

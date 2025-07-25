@@ -44,33 +44,43 @@ export class InvoiceController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<InvoiceEntity | null> {
-    return this.invoiceService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<InvoiceEntity> {
+    return this.invoiceService.findOne(id, req.user.companyId);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<InvoiceEntity>,
-  ): Promise<InvoiceEntity | null> {
+    @Request() req: { user: { companyId: string } },
+  ): Promise<InvoiceEntity> {
     const result = InvoiceSchema.partial().safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.invoiceService.update(id, result.data);
+    return this.invoiceService.update(id, result.data, req.user.companyId);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.invoiceService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.invoiceService.remove(id, req.user.companyId);
   }
 
   // Hard delete an invoice by ID (OWNER only)
   @Delete(':id/hard')
   @Roles(UserRole.OWNER)
   @HttpCode(204)
-  hardRemove(@Param('id') id: string): Promise<void> {
-    return this.invoiceService.hardRemove(id);
+  hardRemove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.invoiceService.hardRemove(id, req.user.companyId);
   }
 }

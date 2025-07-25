@@ -21,10 +21,14 @@ import {
   ClientWithMostOrders,
   ProductWithHighestStock,
 } from './product.reports';
+import { ProductReportService } from './product.report.service';
 
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly productReportService: ProductReportService,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -58,54 +62,69 @@ export class ProductController {
     @Query('limit') limit?: string,
   ): Promise<BestsellingProduct[]> {
     const lim = limit ? parseInt(limit, 10) : 10;
-    return this.productService.getBestsellingProducts(req.user.companyId, lim);
+    return this.productReportService.getBestsellingProducts(
+      req.user.companyId,
+      lim,
+    );
   }
 
   @Get('client-with-most-orders')
   getClientWithMostOrders(
     @Request() req: { user: { companyId: string } },
   ): Promise<ClientWithMostOrders | undefined> {
-    return this.productService.getClientWithMostOrders(req.user.companyId);
+    return this.productReportService.getClientWithMostOrders(
+      req.user.companyId,
+    );
   }
 
   @Get('highest-stock-per-warehouse')
   getProductWithHighestStockPerWarehouse(
     @Request() req: { user: { companyId: string } },
   ): Promise<ProductWithHighestStock[]> {
-    return this.productService.getProductWithHighestStockPerWarehouse(
+    return this.productReportService.getProductWithHighestStockPerWarehouse(
       req.user.companyId,
     );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ProductEntity | null> {
-    return this.productService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ProductEntity> {
+    return this.productService.findOne(id, req.user.companyId);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<ProductEntity>,
-  ): Promise<ProductEntity | null> {
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ProductEntity> {
     const result = ProductSchema.partial().safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.productService.update(id, result.data);
+    return this.productService.update(id, result.data, req.user.companyId);
   }
 
   // Soft delete a product by ID
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.productService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.productService.remove(id, req.user.companyId);
   }
 
   // Hard delete a product by ID (OWNER only)
   @Delete(':id/hard')
   @Roles(UserRole.OWNER)
   @HttpCode(204)
-  hardRemove(@Param('id') id: string): Promise<void> {
-    return this.productService.hardRemove(id);
+  hardRemove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.productService.hardRemove(id, req.user.companyId);
   }
 }

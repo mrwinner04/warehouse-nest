@@ -41,33 +41,43 @@ export class OrderItemController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<OrderItemEntity | null> {
-    return this.orderItemService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<OrderItemEntity> {
+    return this.orderItemService.findOne(id, req.user.companyId);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<OrderItemEntity>,
-  ): Promise<OrderItemEntity | null> {
+    @Request() req: { user: { companyId: string } },
+  ): Promise<OrderItemEntity> {
     const result = OrderItemSchema.safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.orderItemService.update(id, result.data);
+    return this.orderItemService.update(id, result.data, req.user.companyId);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.orderItemService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.orderItemService.remove(id, req.user.companyId);
   }
 
   // Hard delete an order item by ID (OWNER only)
   @Delete(':id/hard')
   @Roles(UserRole.OWNER)
   @HttpCode(204)
-  hardRemove(@Param('id') id: string): Promise<void> {
-    return this.orderItemService.hardRemove(id);
+  hardRemove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.orderItemService.hardRemove(id, req.user.companyId);
   }
 }

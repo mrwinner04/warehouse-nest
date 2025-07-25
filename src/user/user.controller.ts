@@ -129,8 +129,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.OPERATOR, UserRole.VIEWER)
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<UserEntity | null> {
-    return this.userService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: UserEntity },
+  ): Promise<UserEntity> {
+    return this.userService.findOne(id, req.user.companyId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -139,7 +142,8 @@ export class UserController {
   async update(
     @Param('id') id: string,
     @Body() data: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
+    @Request() req: { user: UserEntity },
+  ): Promise<UserEntity> {
     const result = UserSchema.partial().safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
@@ -148,14 +152,17 @@ export class UserController {
       ...result.data,
       role: result.data.role ? UserRole[result.data.role] : undefined,
     };
-    return this.userService.update(id, userData);
+    return this.userService.update(id, userData, req.user.companyId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER)
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.userService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: UserEntity },
+  ): Promise<void> {
+    return this.userService.remove(id, req.user.companyId);
   }
 }

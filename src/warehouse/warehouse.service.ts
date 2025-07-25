@@ -2,8 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WarehouseEntity } from './warehouse.entity';
+import { validateCompanyAccess } from '../common/company-access.utils';
 
-//da mahna papkite entiti i da smenq zoda da byde prosto static
 @Injectable()
 export class WarehouseService {
   constructor(
@@ -43,16 +43,23 @@ export class WarehouseService {
     return { data, total, page, limit };
   }
 
-  findOne(id: string): Promise<WarehouseEntity | null> {
-    return this.warehouseRepository.findOneBy({ id });
+  // Updated to throw proper errors instead of returning null
+  async findOne(id: string, companyId: string): Promise<WarehouseEntity> {
+    return validateCompanyAccess(
+      () => this.warehouseRepository.findOneBy({ id }),
+      companyId,
+      'Warehouse',
+    );
   }
 
+  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<WarehouseEntity>,
-  ): Promise<WarehouseEntity | null> {
+    companyId: string,
+  ): Promise<WarehouseEntity> {
     const existing = await this.warehouseRepository.findOneBy({
-      companyId: data.companyId,
+      companyId,
       name: data.name,
     });
     if (existing && existing.id !== id) {
@@ -60,15 +67,30 @@ export class WarehouseService {
         'A warehouse with this name already exists for this company',
       );
     }
-    await this.warehouseRepository.update(id, data);
-    return this.findOne(id);
+
+    // First validate access
+    await this.findOne(id, companyId);
+
+    // Update the entity
+    await this.warehouseRepository.update({ id, companyId }, data);
+
+    // Return the updated entity
+    return this.findOne(id, companyId);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.warehouseRepository.softDelete(id);
+  // Updated to throw proper errors
+  async remove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
+    await this.warehouseRepository.softDelete({ id, companyId });
   }
 
-  async hardRemove(id: string): Promise<void> {
-    await this.warehouseRepository.delete(id);
+  // Updated to throw proper errors
+  async hardRemove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
+    await this.warehouseRepository.delete({ id, companyId });
   }
 }

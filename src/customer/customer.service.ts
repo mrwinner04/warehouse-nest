@@ -1,7 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomerEntity } from './customer.entity/customer.entity';
+import { assertNotExists } from '../common.utils';
+import { validateCompanyAccess } from '../common/company-access.utils';
 
 @Injectable()
 export class CustomerService {
@@ -11,15 +13,11 @@ export class CustomerService {
   ) {}
 
   async create(data: Partial<CustomerEntity>): Promise<CustomerEntity> {
-    const existing = await this.customerRepository.findOneBy({
-      name: data.name,
-      companyId: data.companyId,
-    });
-    if (existing) {
-      throw new BadRequestException(
-        'A customer with this name already exists for this company',
-      );
-    }
+    await assertNotExists(
+      this.customerRepository,
+      { name: data.name, companyId: data.companyId },
+      'A customer with this name already exists for this company',
+    );
     const customer = this.customerRepository.create(data);
     return this.customerRepository.save(customer);
   }
@@ -42,32 +40,42 @@ export class CustomerService {
     return { data, total, page, limit };
   }
 
-  findOne(id: string): Promise<CustomerEntity | null> {
-    return this.customerRepository.findOneBy({ id });
+  async findOne(id: string, companyId: string): Promise<CustomerEntity> {
+    return validateCompanyAccess(
+      () => this.customerRepository.findOneBy({ id }),
+      companyId,
+      'Customer',
+    );
   }
 
   async update(
     id: string,
     data: Partial<CustomerEntity>,
-  ): Promise<CustomerEntity | null> {
-    const existing = await this.customerRepository.findOneBy({
-      name: data.name,
-      companyId: data.companyId,
-    });
-    if (existing && existing.id !== id) {
-      throw new BadRequestException(
-        'A customer with this name already exists for this company',
-      );
-    }
-    await this.customerRepository.update(id, data);
-    return this.findOne(id);
+    companyId: string,
+  ): Promise<CustomerEntity> {
+    await assertNotExists(
+      this.customerRepository,
+      { name: data.name, companyId },
+      'A customer with this name already exists for this company',
+      id,
+    );
+
+    await this.findOne(id, companyId);
+
+    await this.customerRepository.update({ id, companyId }, data);
+
+    return this.findOne(id, companyId);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.customerRepository.softDelete(id);
+  async remove(id: string, companyId: string): Promise<void> {
+    await this.findOne(id, companyId);
+
+    await this.customerRepository.softDelete({ id, companyId });
   }
 
-  async hardRemove(id: string): Promise<void> {
-    await this.customerRepository.delete(id);
+  async hardRemove(id: string, companyId: string): Promise<void> {
+    await this.findOne(id, companyId);
+
+    await this.customerRepository.delete({ id, companyId });
   }
 }

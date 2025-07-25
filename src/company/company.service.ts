@@ -1,7 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CompanyEntity } from './company.entity';
+import { assertNotExists } from '../common.utils';
 
 @Injectable()
 export class CompanyService {
@@ -11,12 +12,11 @@ export class CompanyService {
   ) {}
 
   async create(data: Partial<CompanyEntity>): Promise<CompanyEntity> {
-    const existing = await this.companyRepository.findOneBy({
-      name: data.name,
-    });
-    if (existing) {
-      throw new BadRequestException('A company with this name already exists');
-    }
+    await assertNotExists(
+      this.companyRepository,
+      { name: data.name },
+      'A company with this name already exists',
+    );
     const company = this.companyRepository.create(data);
     return this.companyRepository.save(company);
   }
@@ -33,12 +33,12 @@ export class CompanyService {
     id: string,
     data: Partial<CompanyEntity>,
   ): Promise<CompanyEntity | null> {
-    const existing = await this.companyRepository.findOneBy({
-      name: data.name,
-    });
-    if (existing && existing.id !== id) {
-      throw new BadRequestException('A company with this name already exists');
-    }
+    await assertNotExists(
+      this.companyRepository,
+      { name: data.name },
+      'A company with this name already exists',
+      id,
+    );
     await this.companyRepository.update(id, data);
     return this.findOne(id);
   }

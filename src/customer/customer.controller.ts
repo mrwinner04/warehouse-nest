@@ -32,7 +32,6 @@ export class CustomerController {
   }
 
   @Get()
-  // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
     @Query('page') page?: string,
@@ -44,33 +43,42 @@ export class CustomerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<CustomerEntity | null> {
-    return this.customerService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<CustomerEntity> {
+    return this.customerService.findOne(id, req.user.companyId);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() data: Partial<CustomerEntity>,
-  ): Promise<CustomerEntity | null> {
+    @Request() req: { user: { companyId: string } },
+  ): Promise<CustomerEntity> {
     const result = CustomerSchema.partial().safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    return this.customerService.update(id, result.data);
+    return this.customerService.update(id, result.data, req.user.companyId);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.customerService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.customerService.remove(id, req.user.companyId);
   }
 
-  // Hard delete a customer by ID (OWNER only)
   @Delete(':id/hard')
   @Roles(UserRole.OWNER)
   @HttpCode(204)
-  hardRemove(@Param('id') id: string): Promise<void> {
-    return this.customerService.hardRemove(id);
+  hardRemove(
+    @Param('id') id: string,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<void> {
+    return this.customerService.hardRemove(id, req.user.companyId);
   }
 }

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { validateCompanyAccess } from '../common/company-access.utils';
 
 @Injectable()
 export class UserService {
@@ -21,22 +22,40 @@ export class UserService {
     return this.userRepository.find({ where: { companyId } });
   }
 
-  findOne(id: string): Promise<UserEntity | null> {
-    return this.userRepository.findOneBy({ id });
+  // Updated to throw proper errors instead of returning null
+  async findOne(id: string, companyId: string): Promise<UserEntity> {
+    return validateCompanyAccess(
+      () => this.userRepository.findOneBy({ id }),
+      companyId,
+      'User',
+    );
   }
 
+  // Updated to throw proper errors instead of returning null
   async update(
     id: string,
     data: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
+    companyId: string,
+  ): Promise<UserEntity> {
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
-    await this.userRepository.update(id, data);
-    return this.findOne(id);
+
+    // First validate access
+    await this.findOne(id, companyId);
+
+    // Update the entity
+    await this.userRepository.update({ id, companyId }, data);
+
+    // Return the updated entity
+    return this.findOne(id, companyId);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.userRepository.softDelete(id);
+  // Updated to throw proper errors
+  async remove(id: string, companyId: string): Promise<void> {
+    // First validate access
+    await this.findOne(id, companyId);
+
+    await this.userRepository.softDelete({ id, companyId });
   }
 }

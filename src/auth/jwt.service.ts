@@ -85,19 +85,7 @@ export class JwtServiceCustom {
     email: string,
     password: string,
   ): Promise<{ accessToken: string }> {
-    console.log('Login attempt:', { email, password });
     const user = await this.userRepository.findOneBy({ email });
-    console.log('User found:', user);
-    if (!user) {
-      console.log('No user found for email:', email);
-    } else {
-      console.log('Comparing passwords:', password, user.password);
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      console.log('Password match:', passwordMatch);
-      if (!passwordMatch) {
-        console.log('Password does not match');
-      }
-    }
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid email or password.');
     }

@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { CompanyAccessInterceptor } from './common/company-access.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Swagger setup
+  app.useGlobalInterceptors(new CompanyAccessInterceptor());
+
   const config = new DocumentBuilder()
     .setTitle('Warehouse SaaS API')
     .setDescription(
@@ -19,4 +21,7 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Application failed to start:', err);
+  process.exit(1);
+});
