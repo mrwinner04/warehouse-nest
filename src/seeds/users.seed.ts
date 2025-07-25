@@ -36,6 +36,5 @@ export async function seedUsers(
   ]);
   await userRepo.insert(users);
 
-  console.log('Seeded users');
   return users;
 }

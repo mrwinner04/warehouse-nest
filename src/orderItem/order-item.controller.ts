@@ -6,8 +6,8 @@ import {
   Param,
   Put,
   Delete,
-  BadRequestException,
   Request,
+  UsePipes,
 } from '@nestjs/common';
 import { OrderItemService } from './order-item.service';
 import { OrderItemEntity } from './order-item.entity';
@@ -15,6 +15,7 @@ import { OrderItemSchema } from './order-item.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../user/user.entity';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('order-item')
 export class OrderItemController {
@@ -22,18 +23,14 @@ export class OrderItemController {
 
   @Post()
   @HttpCode(201)
+  @UsePipes(new ZodValidationPipe(OrderItemSchema))
   async create(
     @Body() data: Partial<OrderItemEntity>,
   ): Promise<OrderItemEntity> {
-    const result = OrderItemSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.orderItemService.create(result.data);
+    return this.orderItemService.create(data);
   }
 
   @Get()
-  // Add JWT guard if not present
   findAll(
     @Request() req: { user: { companyId: string } },
   ): Promise<OrderItemEntity[]> {
@@ -49,16 +46,13 @@ export class OrderItemController {
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(OrderItemSchema.partial()))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<OrderItemEntity>,
     @Request() req: { user: { companyId: string } },
   ): Promise<OrderItemEntity> {
-    const result = OrderItemSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.orderItemService.update(id, result.data, req.user.companyId);
+    return this.orderItemService.update(id, data, req.user.companyId);
   }
 
   @Delete(':id')

@@ -8,7 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { OrderEntity } from '../order/order.entity';
-import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { CustomerEntity } from '../customer/customer.entity';
 import { UserEntity } from '../user/user.entity';
 import { ProductEntity } from '../product/product.entity';
 import { InvoiceEntity } from '../invoice/invoice.entity';

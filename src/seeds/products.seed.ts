@@ -23,6 +23,5 @@ export async function seedProducts(
   );
   await productRepo.insert(products);
 
-  console.log('Seeded products');
   return products;
 }

@@ -59,7 +59,6 @@ export class UserController {
   async publicRegister(
     @Body() data: Partial<UserEntity> & { companyName: string },
   ): Promise<Omit<UserEntity, 'password'>> {
-    console.log('public-register body:', data); // Debug log
     const { companyName, ...userData } = data;
     if (!companyName) {
       throw new BadRequestException('companyName is required');
@@ -73,8 +72,6 @@ export class UserController {
       ...result.data,
       role: toUserRole(result.data.role),
     };
-
-    console.log('Public register data:', safeUserData, companyName);
 
     return this.jwtServiceCustom.publicRegister(safeUserData, companyName);
   }
@@ -99,17 +96,14 @@ export class UserController {
     @Body() data: Partial<UserEntity>,
     @Request() req: { user: UserEntity },
   ): Promise<Omit<UserEntity, 'password'>> {
-    // Omit companyId from validation for add-to-company
     const result = UserSchema.omit({ companyId: true }).safeParse(data);
     if (!result.success) {
       throw new BadRequestException(result.error);
     }
-    // Convert string role to UserRole enum if present
     const userData: Partial<UserEntity> = {
       ...result.data,
       role: toUserRole(result.data.role),
     };
-    // req.user is set by JwtAuthGuard
     const ownerUser = req.user;
     return this.jwtServiceCustom.registerUserToCompany(userData, ownerUser);
   }

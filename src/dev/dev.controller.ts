@@ -6,7 +6,7 @@ import { OrderService } from '../order/order.service';
 import { OrderItemService } from '../orderItem/order-item.service';
 import { ProductEntity } from '../product/product.entity';
 import { WarehouseEntity } from '../warehouse/warehouse.entity';
-import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { CustomerEntity } from '../customer/customer.entity';
 import { OrderEntity } from '../order/order.entity';
 import { OrderItemEntity } from '../orderItem/order-item.entity';
 import { faker } from '@faker-js/faker';

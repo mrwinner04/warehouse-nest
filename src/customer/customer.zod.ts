@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const CustomerSchema = z.object({
   id: z.uuid().optional(),
 
-  companyId: z.string().uuid({ message: 'companyId must be a valid UUID' }),
+  companyId: z.string().optional(),
 
   type: z.enum(['customer', 'supplier']),
 

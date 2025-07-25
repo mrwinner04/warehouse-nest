@@ -10,7 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { CompanyEntity } from '../company/company.entity';
-import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { CustomerEntity } from '../customer/customer.entity';
 import { WarehouseEntity } from '../warehouse/warehouse.entity';
 import { OrderItemEntity } from '../orderItem/order-item.entity';
 import { InvoiceEntity } from '../invoice/invoice.entity';

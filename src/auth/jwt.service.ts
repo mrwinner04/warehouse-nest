@@ -93,7 +93,7 @@ export class JwtServiceCustom {
       sub: user.id,
       role: user.role,
       email: user.email,
-      companyId: user.companyId, // Added for multi-tenancy
+      companyId: user.companyId,
     };
     return {
       accessToken: this.jwtService.sign(payload),

@@ -44,6 +44,5 @@ export async function seedOrders(
   );
   await orderRepo.insert(orders);
 
-  console.log('Seeded orders');
   return orders;
 }

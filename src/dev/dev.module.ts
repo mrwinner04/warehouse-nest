@@ -7,7 +7,7 @@ import { OrderService } from '../order/order.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductEntity } from '../product/product.entity';
 import { WarehouseEntity } from '../warehouse/warehouse.entity';
-import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { CustomerEntity } from '../customer/customer.entity';
 import { OrderEntity } from '../order/order.entity';
 import { InvoiceModule } from 'src/invoice/invoice.module';
 import { OrderItemService } from '../orderItem/order-item.service';

@@ -6,9 +6,9 @@ import {
   Param,
   Put,
   Delete,
-  BadRequestException,
   Request,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceEntity } from './invoice.entity';
@@ -16,6 +16,7 @@ import { InvoiceSchema } from './invoice.zod';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../user/user.entity';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -23,12 +24,13 @@ export class InvoiceController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() data: Partial<InvoiceEntity>): Promise<InvoiceEntity> {
-    const result = InvoiceSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.invoiceService.create(result.data);
+  @UsePipes(new ZodValidationPipe(InvoiceSchema))
+  async create(
+    @Body() data: Partial<InvoiceEntity>,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<InvoiceEntity> {
+    const invoiceData = { ...data, companyId: req.user.companyId };
+    return this.invoiceService.create(invoiceData);
   }
 
   @Get()
@@ -52,16 +54,14 @@ export class InvoiceController {
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(InvoiceSchema.partial()))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<InvoiceEntity>,
     @Request() req: { user: { companyId: string } },
   ): Promise<InvoiceEntity> {
-    const result = InvoiceSchema.partial().safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.invoiceService.update(id, result.data, req.user.companyId);
+    const invoiceData = { ...data, companyId: req.user.companyId };
+    return this.invoiceService.update(id, invoiceData, req.user.companyId);
   }
 
   @Delete(':id')

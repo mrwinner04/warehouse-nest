@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { CustomerEntity } from '../customer/customer.entity/customer.entity';
+import { CustomerEntity } from '../customer/customer.entity';
 import { faker } from '@faker-js/faker';
 
 export async function seedCustomers(
@@ -22,6 +22,5 @@ export async function seedCustomers(
   );
   await customerRepo.insert(customers);
 
-  console.log('Seeded customers');
   return customers;
 }

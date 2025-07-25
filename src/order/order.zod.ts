@@ -3,8 +3,6 @@ import { z } from 'zod';
 export const OrderSchema = z.object({
   id: z.uuid().optional(),
 
-  companyId: z.uuid({ message: 'companyId must be a valid UUID' }),
-
   number: z.string().min(1, 'Order number is required'),
 
   type: z.enum(['sales', 'purchase', 'transfer']),

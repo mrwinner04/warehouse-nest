@@ -36,6 +36,5 @@ export async function seedOrderItems(
   });
   await orderItemRepo.insert(orderItems);
 
-  console.log('Seeded order items');
   return orderItems;
 }

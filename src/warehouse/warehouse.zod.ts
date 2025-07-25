@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const WarehouseSchema = z.object({
   id: z.uuid().optional(),
-  companyId: z.uuid({ message: 'companyId must be a valid UUID' }),
   type: z.enum(['solid', 'liquid']).optional(),
   name: z.string().min(1, 'Warehouse name is required'),
   address: z.string().optional(),

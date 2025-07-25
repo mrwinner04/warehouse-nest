@@ -52,6 +52,5 @@ export async function seedCompaniesAndWarehouses(dataSource: DataSource) {
   ];
   await warehouseRepo.save(warehouses);
 
-  console.log('Seeded companies and warehouses');
   return { companies, warehouses };
 }

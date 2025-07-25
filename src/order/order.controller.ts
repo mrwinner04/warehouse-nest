@@ -8,14 +8,15 @@ import {
   Put,
   Request,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderEntity } from './order.entity';
 import { OrderSchema } from './order.zod';
-import { BadRequestException } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../user/user.entity';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('order')
 export class OrderController {
@@ -23,12 +24,13 @@ export class OrderController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() data: Partial<OrderEntity>): Promise<OrderEntity> {
-    const result = OrderSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.orderService.create(result.data);
+  @UsePipes(new ZodValidationPipe(OrderSchema))
+  async create(
+    @Body() data: Partial<OrderEntity>,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<OrderEntity> {
+    const orderData = { ...data, companyId: req.user.companyId };
+    return this.orderService.create(orderData);
   }
 
   @Get()
@@ -52,16 +54,14 @@ export class OrderController {
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(OrderSchema.partial()))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<OrderEntity>,
     @Request() req: { user: { companyId: string } },
   ): Promise<OrderEntity> {
-    const result = OrderSchema.partial().safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.orderService.update(id, result.data, req.user.companyId);
+    const orderData = { ...data, companyId: req.user.companyId };
+    return this.orderService.update(id, orderData, req.user.companyId);
   }
 
   @Delete(':id')

@@ -6,10 +6,10 @@ import {
   Param,
   Put,
   Delete,
-  BadRequestException,
   UseGuards,
   Request,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { WarehouseEntity } from './warehouse.entity';
@@ -18,6 +18,7 @@ import { HttpCode } from '@nestjs/common/decorators/http/http-code.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../user/user.entity';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -25,14 +26,13 @@ export class WarehouseController {
 
   @Post()
   @HttpCode(204)
+  @UsePipes(new ZodValidationPipe(WarehouseSchema))
   async create(
     @Body() data: Partial<WarehouseEntity>,
+    @Request() req: { user: { companyId: string } },
   ): Promise<WarehouseEntity> {
-    const result = WarehouseSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.warehouseService.create(result.data);
+    const warehouseData = { ...data, companyId: req.user.companyId };
+    return this.warehouseService.create(warehouseData);
   }
 
   @Get()
@@ -56,16 +56,14 @@ export class WarehouseController {
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(WarehouseSchema.partial()))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<WarehouseEntity>,
     @Request() req: { user: { companyId: string } },
   ): Promise<WarehouseEntity> {
-    const result = WarehouseSchema.partial().safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.warehouseService.update(id, result.data, req.user.companyId);
+    const warehouseData = { ...data, companyId: req.user.companyId };
+    return this.warehouseService.update(id, warehouseData, req.user.companyId);
   }
 
   @Delete(':id')

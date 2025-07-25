@@ -6,9 +6,9 @@ import {
   Param,
   Put,
   Delete,
-  BadRequestException,
   Request,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductEntity } from './product.entity';
@@ -22,6 +22,7 @@ import {
   ProductWithHighestStock,
 } from './product.reports';
 import { ProductReportService } from './product.report.service';
+import { ZodValidationPipe } from '../zod.validation.pipe';
 
 @Controller('product')
 export class ProductController {
@@ -32,12 +33,13 @@ export class ProductController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() data: Partial<ProductEntity>): Promise<ProductEntity> {
-    const result = ProductSchema.safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.productService.create(result.data);
+  @UsePipes(new ZodValidationPipe(ProductSchema))
+  async create(
+    @Body() data: Partial<ProductEntity>,
+    @Request() req: { user: { companyId: string } },
+  ): Promise<ProductEntity> {
+    const productData = { ...data, companyId: req.user.companyId };
+    return this.productService.create(productData);
   }
 
   @Get()
@@ -95,16 +97,15 @@ export class ProductController {
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(ProductSchema.partial()))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<ProductEntity>,
     @Request() req: { user: { companyId: string } },
   ): Promise<ProductEntity> {
-    const result = ProductSchema.partial().safeParse(data);
-    if (!result.success) {
-      throw new BadRequestException(result.error);
-    }
-    return this.productService.update(id, result.data, req.user.companyId);
+    // Always use companyId from JWT, ignore any in body
+    const productData = { ...data, companyId: req.user.companyId };
+    return this.productService.update(id, productData, req.user.companyId);
   }
 
   // Soft delete a product by ID
