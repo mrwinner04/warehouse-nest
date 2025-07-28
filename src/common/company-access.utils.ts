@@ -11,7 +11,7 @@ export function checkCompanyAccess<T extends { companyId?: string }>(
 
   if (entity.companyId && entity.companyId !== userCompanyId) {
     throw new ForbiddenException(
-      `Access denied: You can only access ${entityName.toLowerCase()} data from your own company`,
+      `Access denied: You can only access data from your own company`,
     );
   }
 

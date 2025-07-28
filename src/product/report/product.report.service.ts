@@ -49,11 +49,11 @@ export class ProductReportService {
       .innerJoin(
         'orders',
         'order',
-        'order.customer_id = customer.id AND order.company_id = :companyId AND order.deleted_at IS NULL',
-        { companyId },
+        'order.customer_id = customer.id AND order.deleted_at IS NULL',
       )
       .where('customer.company_id = :companyId', { companyId })
       .andWhere('customer.deleted_at IS NULL')
+      .andWhere('order.company_id = :companyId', { companyId })
       .groupBy('customer.id')
       .addGroupBy('customer.name')
       .orderBy('"orderCount"', 'DESC')
@@ -75,8 +75,7 @@ export class ProductReportService {
       .innerJoin(
         'orders',
         'o',
-        'o.warehouse_id = warehouse.id AND o.company_id = :companyId AND o.deleted_at IS NULL',
-        { companyId },
+        'o.warehouse_id = warehouse.id AND o.deleted_at IS NULL',
       )
       .innerJoin(
         'order_items',
@@ -90,6 +89,7 @@ export class ProductReportService {
       )
       .where('warehouse.company_id = :companyId', { companyId })
       .andWhere('warehouse.deleted_at IS NULL')
+      .andWhere('o.company_id = :companyId', { companyId })
       .groupBy('warehouse.id')
       .addGroupBy('warehouse.name')
       .addGroupBy('product.id')

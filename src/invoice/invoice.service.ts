@@ -53,6 +53,7 @@ export class InvoiceService {
     return { data, total, page, limit };
   }
 
+  //da izpolvam where vmesto tova sega i da vrystham null za vsichki findOne
   async findOne(id: string, companyId: string): Promise<InvoiceEntity> {
     return validateCompanyAccess(
       () => this.invoiceRepository.findOneBy({ id }),

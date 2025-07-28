@@ -36,7 +36,6 @@ export class OrderItemService {
       .getMany();
   }
 
-  // Custom validation for order items since they don't have direct companyId
   async findOne(id: string, companyId: string): Promise<OrderItemEntity> {
     const orderItem = await this.orderItemRepository
       .createQueryBuilder('orderItem')

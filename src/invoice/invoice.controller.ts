@@ -64,6 +64,7 @@ export class InvoiceController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.OPERATOR)
   @HttpCode(204)
   remove(
     @Param('id') id: string,

@@ -11,7 +11,16 @@ import { OrderEntity } from '../order/order.entity';
 import { OrderItemEntity } from '../orderItem/order-item.entity';
 import { faker } from '@faker-js/faker';
 import { nanoid } from 'nanoid';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { GenerateDemoDataDto, DemoDataResponseDto } from './dto/dev.dto';
 
+@ApiTags('Development')
+@ApiBearerAuth('access-token')
 @Controller('dev')
 export class DevController {
   constructor(
@@ -23,13 +32,16 @@ export class DevController {
   ) {}
 
   @Post('generate-demo-data')
-  async generateDemoData(@Body() body: { companyId: string }): Promise<{
-    products: string[];
-    warehouses: string[];
-    customers: string[];
-    orders: string[];
-    orderItems: string[];
-  }> {
+  @ApiOperation({ summary: 'Generate demo data for testing' })
+  @ApiResponse({
+    status: 201,
+    description: 'Demo data generated successfully',
+    type: DemoDataResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid company ID' })
+  async generateDemoData(
+    @Body() body: GenerateDemoDataDto,
+  ): Promise<DemoDataResponseDto> {
     const { companyId } = body;
 
     // Generate 5 products
@@ -74,7 +86,7 @@ export class DevController {
       Array.from({ length: 5 }).map((_, index) =>
         this.orderService.create({
           companyId,
-          number: `ORD-${Date.now()}-${index}-${nanoid(8)}`,
+          number: `ORD-${Date.now()}-${index}-${nanoid(8)}`, // Ensure unique order numbers
           type: faker.helpers.arrayElement(['sales', 'purchase', 'transfer']),
           customerId: faker.helpers.arrayElement(customers).id,
           warehouseId: faker.helpers.arrayElement(warehouses).id,

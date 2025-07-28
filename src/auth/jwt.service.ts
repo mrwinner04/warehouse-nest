@@ -38,8 +38,17 @@ export class JwtServiceCustom {
     const reloaded = await this.userRepository.findOneBy({ id: saved.id });
     if (!reloaded)
       throw new BadRequestException('Registration failed. User not found.');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = reloaded;
+    const userWithoutPassword: Omit<UserEntity, 'password'> = {
+      id: reloaded.id,
+      email: reloaded.email,
+      name: reloaded.name,
+      role: reloaded.role,
+      companyId: reloaded.companyId,
+      company: reloaded.company,
+      createdAt: reloaded.createdAt,
+      updatedAt: reloaded.updatedAt,
+      deletedAt: reloaded.deletedAt,
+    };
     return userWithoutPassword;
   }
 

@@ -21,4 +21,6 @@ export const AppDataSource = new DataSource({
     OrderEntity,
     InvoiceEntity,
   ],
+  migrations: ['src/migration/*.ts'],
+  migrationsTableName: 'migrations',
 });
